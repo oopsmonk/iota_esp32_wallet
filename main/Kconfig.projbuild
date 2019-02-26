@@ -1,0 +1,43 @@
+menu "IOTA CClient Configuration"
+
+    choice FLEX_TRIT_ENCODING
+        prompt "flex_trit encoding"
+        default THREE_ONE_PER_BYTE
+        help
+            flex_trit encoding for the trinary module.
+
+        config ONE_TRIT_PER_BYTE
+            bool "1 trit per byte"
+        config THREE_TRIT_PER_BYTE
+            bool "3 trits per byte"
+        config FOUR_TRIT_PER_BYTE
+            bool "4 trits per byte"
+        config FIVE_TRIT_PER_BYTE
+            bool "5 trits per byte"
+    endchoice
+
+    config IRI_NODE_URI
+        string "IRI Node URI"
+        default "altnodes.devnet.iota.org"
+        help
+            IRI uri for the example to use.
+
+    config IRI_NODE_PORT
+        string "Port Number of IRI Node"
+        default "80"
+        help
+            IRI port for the example to use.
+
+    config WIFI_SSID
+        string "WiFi SSID"
+        default "myssid"
+        help
+            SSID (network name) for the example to connect to.
+
+    config WIFI_PASSWORD
+        string "WiFi Password"
+        default "mypassword"
+        help
+            WiFi password (WPA or WPA2) for the example to use.
+
+endmenu

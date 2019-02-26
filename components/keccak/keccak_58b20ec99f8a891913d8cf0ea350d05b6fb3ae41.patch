@@ -1,0 +1,34 @@
+diff --git a/lib/high/Keccak/FIPS202/KeccakHash.c b/lib/high/Keccak/FIPS202/KeccakHash.c
+index 4bc5b31..d7b1544 100644
+--- a/lib/high/Keccak/FIPS202/KeccakHash.c
++++ b/lib/high/Keccak/FIPS202/KeccakHash.c
+@@ -21,7 +21,7 @@ HashReturn Keccak_HashInitialize(Keccak_HashInstance *instance, unsigned int rat
+     HashReturn result;
+ 
+     if (delimitedSuffix == 0)
+-        return FAIL;
++        return KECCAK_FAIL;
+     result = (HashReturn)KeccakWidth1600_SpongeInitialize(&instance->sponge, rate, capacity);
+     if (result != SUCCESS)
+         return result;
+@@ -73,6 +73,6 @@ HashReturn Keccak_HashFinal(Keccak_HashInstance *instance, BitSequence *hashval)
+ HashReturn Keccak_HashSqueeze(Keccak_HashInstance *instance, BitSequence *data, BitLength databitlen)
+ {
+     if ((databitlen % 8) != 0)
+-        return FAIL;
++        return KECCAK_FAIL;
+     return (HashReturn)KeccakWidth1600_SpongeSqueeze(&instance->sponge, data, databitlen/8);
+ }
+diff --git a/lib/high/Keccak/FIPS202/KeccakHash.h b/lib/high/Keccak/FIPS202/KeccakHash.h
+index 782f144..0ae96f0 100644
+--- a/lib/high/Keccak/FIPS202/KeccakHash.h
++++ b/lib/high/Keccak/FIPS202/KeccakHash.h
+@@ -26,7 +26,7 @@ typedef unsigned char BitSequence;
+ typedef size_t BitLength;
+ #endif
+ 
+-typedef enum { SUCCESS = 0, FAIL = 1, BAD_HASHLEN = 2 } HashReturn;
++typedef enum { SUCCESS = 0, KECCAK_FAIL = 1, KECCAK_BAD_HASHLEN = 2 } HashReturn;
+ 
+ typedef struct {
+     KeccakWidth1600_SpongeInstance sponge;

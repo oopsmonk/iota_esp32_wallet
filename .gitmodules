@@ -1,0 +1,16 @@
+[submodule "components/embear_logger/logger"]
+	path = components/embear_logger/logger
+	url = https://github.com/embear/logger.git
+	branch = v4.0.x
+[submodule "components/uthash/uthash"]
+	path = components/uthash/uthash
+	url = https://github.com/troydhanson/uthash.git
+[submodule "components/iota_cclient/entangled"]
+	path = components/iota_cclient/entangled
+	url = https://github.com/iotaledger/entangled.git
+[submodule "components/http_parser/http_parser"]
+	path = components/http_parser/http_parser
+	url = https://github.com/nodejs/http-parser.git
+[submodule "components/keccak/keccak"]
+	path = components/keccak/keccak
+	url = https://github.com/XKCP/XKCP.git
