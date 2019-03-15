@@ -18,15 +18,19 @@ menu "IOTA CClient Configuration"
 
     config IRI_NODE_URI
         string "IRI Node URI"
-        default "altnodes.devnet.iota.org"
+        default "nodes.thetangle.org"
         help
             IRI uri for the example to use.
 
     config IRI_NODE_PORT
         string "Port Number of IRI Node"
-        default "80"
+        default "443"
         help
             IRI port for the example to use.
+
+    config ENABLE_HTTPS
+        bool "Use HTTPS"
+        default y
 
     config WIFI_SSID
         string "WiFi SSID"

@@ -1,6 +1,6 @@
 #!/bin/bash
 cd ./entangled
-git checkout 76811cbad7012698cd8bf8a5f0767e90e6ae3eed
+git checkout 85d9eaa6360aff59866542bfe807a9aab6d06357
 cd -
 /bin/bash ./gen_hash_container.sh
 

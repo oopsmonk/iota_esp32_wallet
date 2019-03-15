@@ -10,6 +10,7 @@ set(COMPONENT_PRIV_REQUIRES
    http_parser
    keccak
    iota_cclient
+   mbedtls
 )
 
 register_component()

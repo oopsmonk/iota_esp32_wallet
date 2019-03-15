@@ -93,9 +93,25 @@ set(COMMON_SRC
 )
 
 #json serialization
-set(JSON_SERIALIZER_DIR ${CCLIENT_DIR}/serialization)
-set(JSON_SERIALIZER
-    ${JSON_SERIALIZER_DIR}/json/json_serializer.c
+set(JSON_SERIALIZER_JSON_DIR ${CCLIENT_DIR}/serialization/json)
+set(JSON_SERIALIZER_JSON
+    ${JSON_SERIALIZER_JSON_DIR}/json_serializer.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_node_info.c
+    ${JSON_SERIALIZER_JSON_DIR}/helpers.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_neighbors.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_transactions_to_approve.c
+    ${JSON_SERIALIZER_JSON_DIR}/find_transactions.c
+    ${JSON_SERIALIZER_JSON_DIR}/logger.c
+    ${JSON_SERIALIZER_JSON_DIR}/attach_to_tangle.c
+    ${JSON_SERIALIZER_JSON_DIR}/store_transactions.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_balances.c
+    ${JSON_SERIALIZER_JSON_DIR}/remove_neighbors.c
+    ${JSON_SERIALIZER_JSON_DIR}/add_neighbors.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_inclusion_state.c
+    ${JSON_SERIALIZER_JSON_DIR}/broadcast_transactions.c
+    ${JSON_SERIALIZER_JSON_DIR}/check_consistency.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_tips.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_trytes.c
 )
 #request
 set(API_REQUEST_DIR ${CCLIENT_DIR}/request)
@@ -127,14 +143,55 @@ set(API_RESPONSE
     ${API_RESPONSE_DIR}/get_trytes.c
     ${API_RESPONSE_DIR}/remove_neighbors.c
 )
+
+set(CCLIENT_API_CORE_DIR ${CCLIENT_DIR}/api/core)
+set(CCLIENT_CORE
+    ${CCLIENT_API_CORE_DIR}/get_inclusion_states.c
+    ${CCLIENT_API_CORE_DIR}/get_node_info.c
+    ${CCLIENT_API_CORE_DIR}/get_neighbors.c
+    ${CCLIENT_API_CORE_DIR}/core_init.c
+    ${CCLIENT_API_CORE_DIR}/get_transactions_to_approve.c
+    ${CCLIENT_API_CORE_DIR}/find_transactions.c
+    ${CCLIENT_API_CORE_DIR}/logger.c
+    ${CCLIENT_API_CORE_DIR}/attach_to_tangle.c
+    ${CCLIENT_API_CORE_DIR}/store_transactions.c
+    ${CCLIENT_API_CORE_DIR}/get_balances.c
+    ${CCLIENT_API_CORE_DIR}/remove_neighbors.c
+    ${CCLIENT_API_CORE_DIR}/add_neighbors.c
+    ${CCLIENT_API_CORE_DIR}/broadcast_transactions.c
+    ${CCLIENT_API_CORE_DIR}/check_consistency.c
+    ${CCLIENT_API_CORE_DIR}/get_tips.c
+    ${CCLIENT_API_CORE_DIR}/get_trytes.c
+)
+set(CCLIENT_API_EXTENDED_DIR ${CCLIENT_DIR}/api/extended)
+set(CCLIENT_EXTENDED
+    ${CCLIENT_API_EXTENDED_DIR}/send_transfer.c
+    ${CCLIENT_API_EXTENDED_DIR}/extended_init.c
+    ${CCLIENT_API_EXTENDED_DIR}/get_account_data.c
+    ${CCLIENT_API_EXTENDED_DIR}/broadcast_bundle.c
+    ${CCLIENT_API_EXTENDED_DIR}/get_new_address.c
+    ${CCLIENT_API_EXTENDED_DIR}/is_promotable.c
+    ${CCLIENT_API_EXTENDED_DIR}/send_trytes.c
+    ${CCLIENT_API_EXTENDED_DIR}/find_transaction_objects.c
+    ${CCLIENT_API_EXTENDED_DIR}/traverse_bundle.c
+    ${CCLIENT_API_EXTENDED_DIR}/logger.c
+    ${CCLIENT_API_EXTENDED_DIR}/replay_bundle.c
+    ${CCLIENT_API_EXTENDED_DIR}/store_and_broadcast.c
+    ${CCLIENT_API_EXTENDED_DIR}/get_inputs.c
+    ${CCLIENT_API_EXTENDED_DIR}/prepare_transfers.c
+    ${CCLIENT_API_EXTENDED_DIR}/get_latest_inclusion.c
+    ${CCLIENT_API_EXTENDED_DIR}/get_bundle.c
+    ${CCLIENT_API_EXTENDED_DIR}/promote_transaction.c
+    ${CCLIENT_API_EXTENDED_DIR}/get_transaction_objects.c
+)
 # cclient 
 set(CCLIENT
-    ${JSON_SERIALIZER}
+    ${JSON_SERIALIZER_JSON}
     ${API_REQUEST}
     ${API_RESPONSE}
     ${CCLIENT_DIR}/types/types.c
-    ${CCLIENT_DIR}/iota_client_core_api.c
-    ${CCLIENT_DIR}/iota_client_extended_api.c
+    ${CCLIENT_CORE}
+    ${CCLIENT_EXTENDED}
 )
 
 set(COMPONENT_SRCS
@@ -152,6 +209,7 @@ set(COMPONENT_REQUIRES
    uthash
    http_parser
    keccak
+   mbedtls
 )
 
 # esp-idf compoments 
