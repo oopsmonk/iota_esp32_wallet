@@ -7,7 +7,8 @@
 	url = https://github.com/troydhanson/uthash.git
 [submodule "components/iota_cclient/entangled"]
 	path = components/iota_cclient/entangled
-	url = https://github.com/iotaledger/entangled.git
+	url = https://github.com/oopsmonk/entangled.git
+	branch = cclient_esp32
 [submodule "components/http_parser/http_parser"]
 	path = components/http_parser/http_parser
 	url = https://github.com/nodejs/http-parser.git

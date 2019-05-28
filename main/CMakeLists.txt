@@ -1,5 +1,6 @@
 set(COMPONENT_SRCS
     main.c
+    client_api.c
 )
 
 set(COMPONENT_ADD_INCLUDEDIRS ${CMAKE_CURRENT_LIST_DIR})
