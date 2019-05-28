@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <inttypes.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -15,8 +17,6 @@
 
 #include "cclient/api/core/core_api.h"
 #include "cclient/api/extended/extended_api.h"
-#include "cclient/types/types.h"
-#include <inttypes.h>
 
 static char const *amazon_ca1_pem =
     "-----BEGIN CERTIFICATE-----\r\n"

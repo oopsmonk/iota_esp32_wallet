@@ -16,6 +16,8 @@ set(UTILS
     ${UTILS_DIR}/time.c
     ${UTILS_DIR}/logger_helper.c
     ${UTILS_DIR}/handles/socket.c
+    ${UTILS_DIR}/char_buffer.c
+    ${UTILS_DIR}/memset_safe.c
 )
 # trinary
 set(COMMON_TRINARY
@@ -52,15 +54,15 @@ set(HASH_CONTAINERS
 )
 # common curl
 set(COMMON_CURL
-    ${COMMON_DIR}/curl-p/const.c
-    ${COMMON_DIR}/curl-p/curl_p.c
-    ${COMMON_DIR}/curl-p/digest.c
+    ${COMMON_DIR}/crypto/curl-p/const.c
+    ${COMMON_DIR}/crypto/curl-p/curl_p.c
+    ${COMMON_DIR}/crypto/curl-p/digest.c
 )
 set(COMMON_KERL
-    ${COMMON_DIR}/kerl/bigint.c
-    ${COMMON_DIR}/kerl/converter.c
-    ${COMMON_DIR}/kerl/kerl.c
-    ${COMMON_DIR}/kerl/hash.c
+    ${COMMON_DIR}/crypto/kerl/bigint.c
+    ${COMMON_DIR}/crypto/kerl/converter.c
+    ${COMMON_DIR}/crypto/kerl/kerl.c
+    ${COMMON_DIR}/crypto/kerl/hash.c
 )
 set(COMMON_HELPERS
     ${COMMON_DIR}/helpers/checksum.c
@@ -73,12 +75,12 @@ set(COMMON_MODEL
     ${COMMON_DIR}/model/transaction.c
     ${COMMON_DIR}/model/transfer.c
 )
-set(COMMON_POW
-    ${COMMON_DIR}/pow/pow.c
-)
+# set(COMMON_POW
+#     ${COMMON_DIR}/pow/pow.c
+# )
 set(COMMON_SIGN
-    ${COMMON_DIR}/sign/v1/iss_curl.c
-    ${COMMON_DIR}/sign/v1/iss_kerl.c
+    ${COMMON_DIR}/crypto/iss/v1/iss_curl.c
+    ${COMMON_DIR}/crypto/iss/v1/iss_kerl.c
 )
 
 set(COMMON_SRC
@@ -88,30 +90,32 @@ set(COMMON_SRC
     ${COMMON_KERL}
     ${COMMON_HELPERS}
     ${COMMON_MODEL}
-    ${COMMON_POW}
+    # ${COMMON_POW}
     ${COMMON_SIGN}
 )
 
 #json serialization
 set(JSON_SERIALIZER_JSON_DIR ${CCLIENT_DIR}/serialization/json)
 set(JSON_SERIALIZER_JSON
-    ${JSON_SERIALIZER_JSON_DIR}/json_serializer.c
-    ${JSON_SERIALIZER_JSON_DIR}/get_node_info.c
-    ${JSON_SERIALIZER_JSON_DIR}/helpers.c
-    ${JSON_SERIALIZER_JSON_DIR}/get_neighbors.c
-    ${JSON_SERIALIZER_JSON_DIR}/get_transactions_to_approve.c
-    ${JSON_SERIALIZER_JSON_DIR}/find_transactions.c
-    ${JSON_SERIALIZER_JSON_DIR}/logger.c
-    ${JSON_SERIALIZER_JSON_DIR}/attach_to_tangle.c
-    ${JSON_SERIALIZER_JSON_DIR}/store_transactions.c
-    ${JSON_SERIALIZER_JSON_DIR}/get_balances.c
-    ${JSON_SERIALIZER_JSON_DIR}/remove_neighbors.c
     ${JSON_SERIALIZER_JSON_DIR}/add_neighbors.c
-    ${JSON_SERIALIZER_JSON_DIR}/get_inclusion_state.c
+    ${JSON_SERIALIZER_JSON_DIR}/attach_to_tangle.c
     ${JSON_SERIALIZER_JSON_DIR}/broadcast_transactions.c
     ${JSON_SERIALIZER_JSON_DIR}/check_consistency.c
+    ${JSON_SERIALIZER_JSON_DIR}/error.c
+    ${JSON_SERIALIZER_JSON_DIR}/find_transactions.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_balances.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_inclusion_states.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_missing_transactions.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_neighbors.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_node_info.c
     ${JSON_SERIALIZER_JSON_DIR}/get_tips.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_transactions_to_approve.c
     ${JSON_SERIALIZER_JSON_DIR}/get_trytes.c
+    ${JSON_SERIALIZER_JSON_DIR}/helpers.c
+    ${JSON_SERIALIZER_JSON_DIR}/json_serializer.c
+    ${JSON_SERIALIZER_JSON_DIR}/logger.c
+    ${JSON_SERIALIZER_JSON_DIR}/remove_neighbors.c
+    ${JSON_SERIALIZER_JSON_DIR}/store_transactions.c
 )
 #request
 set(API_REQUEST_DIR ${CCLIENT_DIR}/request)
@@ -122,7 +126,7 @@ set(API_REQUEST
     ${API_REQUEST_DIR}/check_consistency.c
     ${API_REQUEST_DIR}/find_transactions.c
     ${API_REQUEST_DIR}/get_balances.c
-    ${API_REQUEST_DIR}/get_inclusion_state.c
+    ${API_REQUEST_DIR}/get_inclusion_states.c
     ${API_REQUEST_DIR}/get_transactions_to_approve.c
     ${API_REQUEST_DIR}/get_trytes.c
     ${API_REQUEST_DIR}/remove_neighbors.c
@@ -133,9 +137,11 @@ set(API_RESPONSE
     ${API_RESPONSE_DIR}/add_neighbors.c
     ${API_RESPONSE_DIR}/attach_to_tangle.c
     ${API_RESPONSE_DIR}/check_consistency.c
+    ${API_RESPONSE_DIR}/error.c
     ${API_RESPONSE_DIR}/find_transactions.c
     ${API_RESPONSE_DIR}/get_balances.c
-    ${API_RESPONSE_DIR}/get_inclusion_state.c
+    ${API_RESPONSE_DIR}/get_inclusion_states.c
+    ${API_RESPONSE_DIR}/get_missing_transactions.c
     ${API_RESPONSE_DIR}/get_neighbors.c
     ${API_RESPONSE_DIR}/get_node_info.c
     ${API_RESPONSE_DIR}/get_tips.c
@@ -189,7 +195,7 @@ set(CCLIENT
     ${JSON_SERIALIZER_JSON}
     ${API_REQUEST}
     ${API_RESPONSE}
-    ${CCLIENT_DIR}/types/types.c
+    # ${CCLIENT_DIR}/types/types.c
     ${CCLIENT_CORE}
     ${CCLIENT_EXTENDED}
 )
