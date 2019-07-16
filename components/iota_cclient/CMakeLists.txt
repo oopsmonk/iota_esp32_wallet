@@ -22,7 +22,6 @@ set(UTILS
 # trinary
 set(COMMON_TRINARY
     ${COMMON_DIR}/trinary/add.c
-    ${COMMON_DIR}/trinary/bct.c
     ${COMMON_DIR}/trinary/flex_trit.c
     ${COMMON_DIR}/trinary/ptrit_incr.c
     ${COMMON_DIR}/trinary/trit_array.c
@@ -112,6 +111,7 @@ set(JSON_SERIALIZER_JSON
     ${JSON_SERIALIZER_JSON_DIR}/logger.c
     ${JSON_SERIALIZER_JSON_DIR}/remove_neighbors.c
     ${JSON_SERIALIZER_JSON_DIR}/store_transactions.c
+    ${JSON_SERIALIZER_JSON_DIR}/were_addresses_spent_from.c
 )
 #request
 set(API_REQUEST_DIR ${CCLIENT_DIR}/request)
@@ -127,6 +127,7 @@ set(API_REQUEST
     ${API_REQUEST_DIR}/get_trytes.c
     ${API_REQUEST_DIR}/remove_neighbors.c
     ${API_REQUEST_DIR}/store_transactions.c
+    ${API_REQUEST_DIR}/were_addresses_spent_from.c
 )
 set(API_RESPONSE_DIR ${CCLIENT_DIR}/response)
 set(API_RESPONSE
@@ -144,6 +145,7 @@ set(API_RESPONSE
     ${API_RESPONSE_DIR}/get_transactions_to_approve.c
     ${API_RESPONSE_DIR}/get_trytes.c
     ${API_RESPONSE_DIR}/remove_neighbors.c
+    ${API_RESPONSE_DIR}/were_addresses_spent_from.c
 )
 
 set(CCLIENT_API_CORE_DIR ${CCLIENT_DIR}/api/core)
@@ -164,6 +166,7 @@ set(CCLIENT_CORE
     ${CCLIENT_API_CORE_DIR}/check_consistency.c
     ${CCLIENT_API_CORE_DIR}/get_tips.c
     ${CCLIENT_API_CORE_DIR}/get_trytes.c
+    ${CCLIENT_API_CORE_DIR}/were_addresses_spent_from.c
 )
 set(CCLIENT_API_EXTENDED_DIR ${CCLIENT_DIR}/api/extended)
 set(CCLIENT_EXTENDED
