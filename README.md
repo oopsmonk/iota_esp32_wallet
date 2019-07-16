@@ -1,15 +1,20 @@
 # IOTA CClient example on ESP32
 
-This is an example project to demonstrate how to use [CClient](https://github.com/iotaledger/entangled/tree/develop/cclient) on the ESP32 development framework.
+This is an example project for demonstrate how to use [CClient](https://github.com/iotaledger/entangled/tree/develop/cclient) on the ESP32 development framework.
 
 ## Requirement  
 
-* ESP32 toolchain
-* ESP-IDF
+* xtensa-esp32 toolchain
+* ESP-IDF v3.2.2
 
 To get the toolchain and ESP-IDF, please reference [esp-idf with CMake](https://docs.espressif.com/projects/esp-idf/en/latest/get-started-cmake/index.html#installation-step-by-step).
 
-## Flash to ESP32
+## Install ESP32 build system  
+
+* [xtensa-esp32 toolchain](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/linux-setup.html) setup  
+* [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/v3.2.2/get-started/index.html#get-esp-idf) setup
+
+## Build and flash to ESP32
 
 ### Step 1: checkout source  
 
@@ -20,7 +25,7 @@ or
 ```
 git clone https://github.com/oopsmonk/iota_cclient_esp32.git
 cd iota_cclient_esp32
-git submodule update --init
+git submodule update --init --recursive
 ```
 
 ### Step 2: Init components
