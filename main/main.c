@@ -81,7 +81,11 @@ static void iota_client_task(void *p)
 
     // testing iota cclient library.
     iota_client_service_t client_service;
-    test_iota_client(&client_service);
+    retcode_t ret = RC_OK;
+    init_iota_client(&client_service);
+    if((ret = iota_get_node_info(&client_service)) != RC_OK){
+      ESP_LOGE(TAG, "Test Failed: %s", error_2_string(ret));
+    }
 
     for (int i = 30; i >= 0; i--)
     {
@@ -93,6 +97,7 @@ static void iota_client_task(void *p)
     esp_restart();
   }
 }
+
 void app_main()
 {
   ESP_LOGI(TAG, "app_main starting...");

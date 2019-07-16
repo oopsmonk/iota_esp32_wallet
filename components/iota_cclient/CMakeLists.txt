@@ -67,7 +67,6 @@ set(COMMON_KERL
 set(COMMON_HELPERS
     ${COMMON_DIR}/helpers/checksum.c
     ${COMMON_DIR}/helpers/digest.c
-    ${COMMON_DIR}/helpers/pow.c
     ${COMMON_DIR}/helpers/sign.c
 )
 set(COMMON_MODEL
@@ -75,12 +74,10 @@ set(COMMON_MODEL
     ${COMMON_DIR}/model/transaction.c
     ${COMMON_DIR}/model/transfer.c
 )
-# set(COMMON_POW
-#     ${COMMON_DIR}/pow/pow.c
-# )
 set(COMMON_SIGN
     ${COMMON_DIR}/crypto/iss/v1/iss_curl.c
     ${COMMON_DIR}/crypto/iss/v1/iss_kerl.c
+    ${COMMON_DIR}/crypto/iss/normalize.c
 )
 
 set(COMMON_SRC
@@ -90,7 +87,6 @@ set(COMMON_SRC
     ${COMMON_KERL}
     ${COMMON_HELPERS}
     ${COMMON_MODEL}
-    # ${COMMON_POW}
     ${COMMON_SIGN}
 )
 
@@ -195,7 +191,6 @@ set(CCLIENT
     ${JSON_SERIALIZER_JSON}
     ${API_REQUEST}
     ${API_RESPONSE}
-    # ${CCLIENT_DIR}/types/types.c
     ${CCLIENT_CORE}
     ${CCLIENT_EXTENDED}
 )

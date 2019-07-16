@@ -27,7 +27,7 @@ void init_iota_client(iota_client_service_t *const service)
   iota_client_extended_init();
 }
 
-retcode_t test_get_node_info(iota_client_service_t *const service)
+retcode_t iota_get_node_info(iota_client_service_t *const service)
 {
   retcode_t ret = RC_ERROR;
   // test get_node_info
@@ -83,10 +83,4 @@ retcode_t test_get_node_info(iota_client_service_t *const service)
 done:
   get_node_info_res_free(&node_res);
   return ret;
-}
-
-retcode_t test_iota_client(iota_client_service_t *const service)
-{
-	init_iota_client(service);
-	return test_get_node_info(service);
 }

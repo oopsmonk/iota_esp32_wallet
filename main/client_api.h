@@ -29,8 +29,7 @@ static char const *amazon_ca1_pem =
     "rqXRfboQnoZsG4q5WTP468SQvvG5\r\n"
     "-----END CERTIFICATE-----\r\n";
 
-// void init_iota_client(iota_client_service_t *const service);
-retcode_t test_get_node_info(iota_client_service_t *const service);
-retcode_t test_iota_client(iota_client_service_t *const service);
+void init_iota_client(iota_client_service_t *const service);
+retcode_t iota_get_node_info(iota_client_service_t *const service);
 
 #endif // _CLIENT_API_H_
