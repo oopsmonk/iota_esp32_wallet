@@ -222,3 +222,19 @@ set(COMPONENT_PRIV_REQUIRES
 )
 
 register_component()
+
+# CClient debug
+if(CONFIG_CCLIENT_DEBUG)
+    add_definitions(-DDEBUG)
+endif()
+
+# flex_trit encoding
+if(CONFIG_ONE_TRIT_PER_BYTE)
+    add_definitions(-DFLEX_TRIT_ENCODING_1_TRITS_PER_BYTE)
+elseif(CONFIG_THREE_TRIT_PER_BYTE)
+    add_definitions(-DFLEX_TRIT_ENCODING_3_TRITS_PER_BYTE)
+elseif(CONFIG_FOUR_TRIT_PER_BYTE)
+    add_definitions(-DFLEX_TRIT_ENCODING_4_TRITS_PER_BYTE)
+elseif(CONFIG_FIVE_TRIT_PER_BYTE)
+    add_definitions(-DFLEX_TRIT_ENCODING_5_TRITS_PER_BYTE)
+endif()
