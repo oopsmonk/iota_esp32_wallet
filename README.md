@@ -61,27 +61,27 @@ You can press `Ctrl` + `]` to exit the monitor and ready for the next setup.
 
 ## Building and flashing Wallet application to ESP32
 
-### Step 1: checkout source  
+### Step 1: cloning wallet repository  
 
-```
+```shell
 git clone --recursive https://github.com/oopsmonk/iota_esp32_wallet.git
 ```
 
-or (if you didn't put the `--recursive` command during clone)  
+Or (if you didn't put the `--recursive` command during clone)  
 
-```
+```shell
 git clone https://github.com/oopsmonk/iota_esp32_wallet.git
 cd iota_esp32_wallet
 git submodule update --init --recursive
 ```
 
-### Step 2: Init components
+### Step 2: initializing components
 
 The `init.sh` helps us to generate files and switch to the right branch for the components.  
 
 Linux:
 
-```
+```shell
 cd iota_esp32_wallet
 bash ./init.sh
 ```
@@ -107,9 +107,10 @@ idf.py menuconfig
 ```
 
 You can check the configures in `sdkconfig` file.  
-Please make sure you enlarged the main stack size(CONFIG_MAIN_TASK_STACK_SIZE) and assigned the seed(CONFIG_IOTA_SEED), Here is an example:  
 
-```
+Please make sure you enlarged the main stack size(`CONFIG_MAIN_TASK_STACK_SIZE`) and assigned the seed(`CONFIG_IOTA_SEED`), Here is an example for the wallet configuration:  
+
+```shell
 CONFIG_SNTP_SERVER="pool.ntp.org"
 CONFIG_SNTP_TZ="CST-8" 
 CONFIG_IOTA_SEED="YOURSEED9YOURSEED9YOURSEED9YOURSEED9YOURSEED9YOURSEED9YOURSEED9YOURSEED9YOURSEED9"
@@ -127,13 +128,13 @@ The `CONFIG_SNTP_TZ` follows the [POSIX Timezone string](https://github.com/naya
 
 ### Step 4: Build & flash
 
-```
+```shell
 idf.py build
 idf.py -p /dev/ttyUSB0 flash && idf.py -p /dev/ttyUSB0 monitor
 ```
 
-output:  
-```
+Output:  
+```shell
 I (2230) event: sta ip: 192.168.11.7, mask: 255.255.255.0, gw: 192.168.11.1
 I (2230) esp32_main: Connected to AP
 I (2240) esp32_main: IRI Node: nodes.devnet.iota.org, port: 443, HTTPS:True
