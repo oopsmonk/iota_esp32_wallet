@@ -62,7 +62,7 @@ static int fn_get_version(int argc, char **argv) {
          info.features & CHIP_FEATURE_EMB_FLASH ? ", Embedded-Flash:" : ", External-Flash:",
          spi_flash_get_chip_size() / (1024 * 1024), " MB");
   printf("\trevision number:%d\r\n", info.revision);
-  printf("IOTA CClient Version:%s\r\n", "v1.0.0");
+  printf("IOTA CClient Version:%s\r\n", "v1.0.0-beta");
   return 0;
 }
 
