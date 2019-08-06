@@ -71,7 +71,7 @@ menu "IOTA Wallet"
 
     choice FLEX_TRIT_ENCODING
         prompt "flex_trit encoding"
-        default THREE_ONE_PER_BYTE
+        default THREE_TRIT_PER_BYTE
         help
             flex_trit encoding for the trinary module.
 
