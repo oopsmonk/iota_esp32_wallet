@@ -1,16 +1,73 @@
-menu "IOTA Wallet Configuration"
+menu "IOTA Wallet"
 
-    config SNTP_SERVER
-        string "SNTP server"
-        default "pool.ntp.org"
-        help
-            Endpoint of Network Time Protocol server.
+    menu "WiFi"
+        config WIFI_SSID
+            string "WiFi SSID"
+            default "myssid"
+            help
+                SSID (network name) for the example to connect to.
 
-    config SNTP_TZ
-        string "Timezone"
-        default "CST-8"
-        help
-            POSIX timezone. Ref: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.json
+        config WIFI_PASSWORD
+            string "WiFi Password"
+            default "mypassword"
+            help
+                WiFi password (WPA or WPA2) for the example to use.
+    endmenu
+
+    menu "SNTP"
+        config SNTP_SERVER
+            string "SNTP server"
+            default "pool.ntp.org"
+            help
+                Endpoint of Network Time Protocol server.
+
+        config SNTP_TZ
+            string "Timezone"
+            default "CST-8"
+            help
+                POSIX timezone. Ref: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.json
+    endmenu
+
+    menu "IRI Node"
+        config IRI_NODE_URI
+            string "IRI Node URI"
+            default "nodes.thetangle.org"
+            help
+                IRI uri for the example to use.
+
+        config IRI_NODE_PORT
+            int "Port Number of IRI Node"
+            default 443
+            help
+                IRI port for the example to use.
+
+        config ENABLE_HTTPS
+            bool "Use HTTPS"
+            default y
+
+        config IOTA_SEED
+            string "Seed"
+            default ""
+            help
+                IRI port for the example to use.
+
+        config IOTA_DEPTH
+            int "Depth for tips selection"
+            default 3
+            help
+                Client application set to 3, if the depth is too large(above 15, it depends on the IRI's configuration)
+                an error will be ocurred.
+
+        config IOTA_MWM
+            int "Minimum Weight Magnitude for PoW"
+            default 14
+            help
+                14 for mannet, 6 for devnet or testnet.
+    endmenu
+
+    config CCLIENT_DEBUG
+        bool "Enable DEBUG in CClient"
+        default n
 
     choice FLEX_TRIT_ENCODING
         prompt "flex_trit encoding"
@@ -27,56 +84,5 @@ menu "IOTA Wallet Configuration"
         config FIVE_TRIT_PER_BYTE
             bool "5 trits per byte"
     endchoice
-
-    config IOTA_SEED
-        string "Seed for this wallet application"
-        default ""
-        help
-            IRI port for the example to use.
-
-    config IOTA_DEPTH
-        int "Depth for tips selection"
-        default 3
-        help
-            Client application set to 3, if the depth is too large(above 15, it depends on the IRI's configuration)
-            an error will be ocurred.
-
-    config IOTA_MWM
-        int "Minimum Weight Magnitude for PoW"
-        default 14
-        help
-            14 for mannet, 6 for devnet or testnet.
-
-    config CCLIENT_DEBUG
-        bool "Enable DEBUG in CClient"
-        default n
-
-    config IRI_NODE_URI
-        string "IRI Node URI"
-        default "nodes.thetangle.org"
-        help
-            IRI uri for the example to use.
-
-    config IRI_NODE_PORT
-        int "Port Number of IRI Node"
-        default 443
-        help
-            IRI port for the example to use.
-
-    config ENABLE_HTTPS
-        bool "Use HTTPS"
-        default y
-
-    config WIFI_SSID
-        string "WiFi SSID"
-        default "myssid"
-        help
-            SSID (network name) for the example to connect to.
-
-    config WIFI_PASSWORD
-        string "WiFi Password"
-        default "mypassword"
-        help
-            WiFi password (WPA or WPA2) for the example to use.
 
 endmenu
