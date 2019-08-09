@@ -90,6 +90,8 @@ Windows: **TODO**
 
 ### Step 3: Wallet Configuration  
 
+In this step, you need to set up the WiFi, SNTP, IRI node, and SEED.  
+
 ```
 idf.py menuconfig
 # WiFi SSID & Password
@@ -100,15 +102,11 @@ idf.py menuconfig
 
 # Default IRI node
 [IOTA Wallet] -> [IRI Node]
-
-# Main stack size
-[Component config] -> [ESP32-specific] -> (20480) Main task stack size
-
 ```
 
-You can check the configures in `sdkconfig` file.  
+You can check configures in `sdkconfig` file.  
 
-Please make sure you enlarged the main stack size(`CONFIG_MAIN_TASK_STACK_SIZE`) and assigned the seed(`CONFIG_IOTA_SEED`), Here is an example for the wallet configuration:  
+Please make sure you assigned the seed(`CONFIG_IOTA_SEED`), Here is an example for your wallet configuration:  
 
 ```shell
 CONFIG_SNTP_SERVER="pool.ntp.org"
@@ -121,7 +119,6 @@ CONFIG_IRI_NODE_PORT=443
 CONFIG_ENABLE_HTTPS=y
 CONFIG_WIFI_SSID="MY_SSID"
 CONFIG_WIFI_PASSWORD="MY_PWD"
-CONFIG_MAIN_TASK_STACK_SIZE=20480 # default is 3584
 ```
 
 The `CONFIG_SNTP_TZ` follows the [POSIX Timezone string](https://github.com/nayarsystems/posix_tz_db/blob/master/zones.json)  
@@ -171,7 +168,7 @@ I (329) esp32_main: Restarting in 30 seconds...
 I (1329) esp32_main: Restarting in 29 seconds...
 ```
 
-`CONFIG_MAIN_TASK_STACK_SIZE` is too small:  
+`CONFIG_MAIN_TASK_STACK_SIZE` is too small, you need to enlarge it:  
 ```shell
 ***ERROR*** A stack overflow in task main has been detected.
 abort() was called at PC 0x4008af7c on core 0
