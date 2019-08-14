@@ -2,6 +2,10 @@
 
 This is an IOTA Wallet application using [IOTA CClient](https://github.com/iotaledger/entangled/tree/develop/cclient) library on [ESP32](https://en.wikipedia.org/wiki/ESP32) microcontroller.  
 
+## Block Diagram  
+
+![](https://raw.githubusercontent.com/oopsmonk/iota_esp32_wallet/master/images/esp32_wallet_block_diagram.png)
+
 ## Requirements  
 
 * [ESP32-DevKitC V4](https://docs.espressif.com/projects/esp-idf/en/v3.2.2/get-started/get-started-devkitc.html#esp32-devkitc-v4-getting-started-guide)
