@@ -484,6 +484,86 @@ static void register_send() {
   ESP_ERROR_CHECK(esp_console_cmd_register(&send_cmd));
 }
 
+/* 'transactions' command */
+static struct {
+  struct arg_str *address;
+  struct arg_end *end;
+} get_transactions_args;
+
+static int fn_get_transactions(int argc, char **argv) {
+  retcode_t ret_code = RC_OK;
+  flex_trit_t tmp_hash[FLEX_TRIT_SIZE_243];
+
+  int nerrors = arg_parse(argc, argv, (void **)&get_transactions_args);
+  if (nerrors != 0) {
+    arg_print_errors(stderr, get_transactions_args.end, argv[0]);
+    return 1;
+  }
+
+  char const *address_ptr = get_transactions_args.address->sval[0];
+
+#if 0
+  if(argc != 2){
+    ESP_LOGE(TAG, "Invalid input");
+    return 2;
+  }
+
+#endif
+  if (strlen(address_ptr) != HASH_LENGTH_TRYTE) {
+    ESP_LOGE(TAG, "Invalid hash length!");
+    return 2;
+  }
+
+  find_transactions_req_t *transactions_req = find_transactions_req_new();
+  find_transactions_res_t *transactions_res = find_transactions_res_new();
+
+  if (!transactions_req || !transactions_res) {
+    ESP_LOGE(TAG, "Error: OOM");
+    goto done;
+  }
+
+  if (flex_trits_from_trytes(tmp_hash, NUM_TRITS_HASH, (const tryte_t *)address_ptr, NUM_TRYTES_HASH,
+                             NUM_TRYTES_HASH) == 0) {
+    ESP_LOGE(TAG, "Error: converting flex_trit failed");
+    goto done;
+  }
+
+  if ((hash243_queue_push(&transactions_req->addresses, tmp_hash)) != RC_OK) {
+    ESP_LOGE(TAG, "Error: add a hash to queue failed.\n");
+    goto done;
+  }
+
+  if (iota_client_find_transactions(&g_cclient, transactions_req, transactions_res) == RC_OK) {
+    size_t count = hash243_queue_count(transactions_res->hashes);
+    hash243_queue_t curr = transactions_res->hashes;
+    for (size_t i = 0; i < count; i++) {
+      printf("[%ld] ", (long int)i);
+      flex_trit_print(curr->hash, NUM_TRITS_HASH);
+      printf("\n");
+      curr = curr->next;
+    }
+    printf("tx count = %ld\n", (long int)count);
+  }
+
+done:
+  find_transactions_req_free(&transactions_req);
+  find_transactions_res_free(&transactions_res);
+  return ret_code;
+}
+
+static void register_get_transactions() {
+  get_transactions_args.address = arg_str1(NULL, NULL, "<ADDRESS>", "An Address hash");
+  get_transactions_args.end = arg_end(1);
+  const esp_console_cmd_t get_transactions_cmd = {
+      .command = "transactions",
+      .help = "Get the transaction associate to an address (after last milestone)",
+      .hint = NULL,
+      .func = &fn_get_transactions,
+      .argtable = &get_transactions_args,
+  };
+  ESP_ERROR_CHECK(esp_console_cmd_register(&get_transactions_cmd));
+}
+
 //============= Public functions====================
 
 void register_wallet_commands() {
@@ -500,6 +580,7 @@ void register_wallet_commands() {
   register_get_balance();
   register_account_data();
   register_send();
+  register_get_transactions();
 }
 
 void init_iota_client() {
