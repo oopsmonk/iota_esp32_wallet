@@ -354,6 +354,13 @@ static void register_account_data() {
   ESP_ERROR_CHECK(esp_console_cmd_register(&account_data_cmd));
 }
 
+void convertToUpperCase(char *sPtr, int nchar){
+  for (int i=0; i<nchar; i++){
+    char *element = sPtr+i;
+    *element = toupper((unsigned char)*element);
+  }
+}
+
 /* 'send' command */
 static struct {
   struct arg_str *receiver;
@@ -388,9 +395,18 @@ static int fn_send(int argc, char **argv) {
     security = 2;
   }
 
+  char padded_tag[28];
+  size_t tag_size = strlen(tag);
+  convertToUpperCase((char *)tag, tag_size);
+  for (size_t i = 0; i < 27; i++){
+    if (i < tag_size) padded_tag[i] = tag[i];
+    else padded_tag[i] = '9';
+  }
+  padded_tag[27] = '\0';
+
   printf("sending %lld to %s\n", value, receiver);
   printf("security %d, depth %d, MWM %d, tag [%s]\n", security, CONFIG_IOTA_DEPTH, CONFIG_IOTA_MWM,
-         strlen(tag) ? tag : "empty");
+         strlen(tag) ? padded_tag : "empty");
   printf("remainder [%s]\n", strlen(remainder) ? remainder : "empty");
   printf("message [%s]\n", strlen(msg) ? msg : "empty");
 
@@ -416,7 +432,8 @@ static int fn_send(int argc, char **argv) {
   }
 
   // tag
-  if (flex_trits_from_trytes(tf.tag, NUM_TRITS_TAG, (tryte_t const *)"CCLIENT99999999999999999999", NUM_TRYTES_TAG,
+  printf("tag: %s\n", padded_tag);
+  if (flex_trits_from_trytes(tf.tag, NUM_TRITS_TAG, (tryte_t const *)padded_tag, NUM_TRYTES_TAG,
                              NUM_TRYTES_TAG) == 0) {
     ESP_LOGE(TAG, "tag flex_trits convertion failed");
     goto done;
