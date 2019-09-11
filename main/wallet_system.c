@@ -395,7 +395,7 @@ static int fn_send(int argc, char **argv) {
     security = 2;
   }
 
-  char padded_tag[28];
+  char padded_tag[NUM_TRYTES_TAG+1];
   size_t tag_size = strlen(tag);
   convertToUpperCase((char *)tag, tag_size);
   for (size_t i = 0; i < 27; i++){
