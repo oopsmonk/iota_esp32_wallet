@@ -402,7 +402,7 @@ static int fn_send(int argc, char **argv) {
     if (i < tag_size) padded_tag[i] = tag[i];
     else padded_tag[i] = '9';
   }
-  padded_tag[27] = '\0';
+  padded_tag[NUM_TRYTES_TAG] = '\0';
 
   printf("sending %lld to %s\n", value, receiver);
   printf("security %d, depth %d, MWM %d, tag [%s]\n", security, CONFIG_IOTA_DEPTH, CONFIG_IOTA_MWM,
