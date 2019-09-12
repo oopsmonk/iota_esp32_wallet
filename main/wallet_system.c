@@ -502,13 +502,6 @@ static int fn_get_transactions(int argc, char **argv) {
 
   char const *address_ptr = get_transactions_args.address->sval[0];
 
-#if 0
-  if(argc != 2){
-    ESP_LOGE(TAG, "Invalid input");
-    return 2;
-  }
-
-#endif
   if (strlen(address_ptr) != HASH_LENGTH_TRYTE) {
     ESP_LOGE(TAG, "Invalid hash length!");
     return 2;
