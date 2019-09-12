@@ -49,6 +49,14 @@ static char const *amazon_ca1_pem =
     "rqXRfboQnoZsG4q5WTP468SQvvG5\r\n"
     "-----END CERTIFICATE-----\r\n";
 
+// string data is not reset in argtable3
+static void arg_str_reset(struct arg_str *parent) {
+  for (int i = 0; i < parent->count; i++) {
+    parent->sval[i] = "";
+  }
+  parent->count = 0;
+}
+
 /* 'version' command */
 static int fn_get_version(int argc, char **argv) {
   esp_chip_info_t info;
@@ -282,6 +290,7 @@ done:
 
 static void register_get_balance() {
   get_balance_args.address = arg_str1(NULL, NULL, "<ADDRESS>", "An Address hash");
+  get_balance_args.address->hdr.resetfn = (arg_resetfn*)arg_str_reset;
   get_balance_args.end = arg_end(1);
   const esp_console_cmd_t get_balance_cmd = {
       .command = "balance",
@@ -457,6 +466,13 @@ static void register_send() {
   send_args.tag = arg_str0("t", "tag", "<TAG>", "A tag for this transaction");
   send_args.security = arg_int0("s", "security", "<SECURITY>", "The security level of the address");
   send_args.end = arg_end(1);
+  //reset callbacks
+  send_args.receiver->hdr.resetfn = (arg_resetfn*)arg_str_reset;
+  send_args.value->hdr.resetfn = (arg_resetfn*)arg_str_reset;
+  send_args.remainder->hdr.resetfn = (arg_resetfn*)arg_str_reset;
+  send_args.message->hdr.resetfn = (arg_resetfn*)arg_str_reset;
+  send_args.tag->hdr.resetfn = (arg_resetfn*)arg_str_reset;
+
   esp_console_cmd_t const send_cmd = {
       .command = "send",
       .help = "send value or data to the Tangle.\n\tex: send ADDRESSES -v=100",
