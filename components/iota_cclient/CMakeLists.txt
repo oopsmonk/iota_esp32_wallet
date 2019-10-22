@@ -24,10 +24,8 @@ set(COMMON_TRINARY
     ${COMMON_DIR}/trinary/add.c
     ${COMMON_DIR}/trinary/flex_trit.c
     ${COMMON_DIR}/trinary/ptrit_incr.c
-    ${COMMON_DIR}/trinary/trit_array.c
     ${COMMON_DIR}/trinary/trit_byte.c
     ${COMMON_DIR}/trinary/trit_long.c
-    ${COMMON_DIR}/trinary/trit_ptrit.c
     ${COMMON_DIR}/trinary/trit_tryte.c
     ${COMMON_DIR}/trinary/tryte_ascii.c
     ${COMMON_DIR}/trinary/tryte_long.c
@@ -102,6 +100,7 @@ set(JSON_SERIALIZER_JSON
     ${JSON_SERIALIZER_JSON_DIR}/get_inclusion_states.c
     ${JSON_SERIALIZER_JSON_DIR}/get_missing_transactions.c
     ${JSON_SERIALIZER_JSON_DIR}/get_neighbors.c
+    ${JSON_SERIALIZER_JSON_DIR}/get_node_api_conf.c
     ${JSON_SERIALIZER_JSON_DIR}/get_node_info.c
     ${JSON_SERIALIZER_JSON_DIR}/get_tips.c
     ${JSON_SERIALIZER_JSON_DIR}/get_transactions_to_approve.c
@@ -167,6 +166,7 @@ set(CCLIENT_CORE
     ${CCLIENT_API_CORE_DIR}/get_tips.c
     ${CCLIENT_API_CORE_DIR}/get_trytes.c
     ${CCLIENT_API_CORE_DIR}/were_addresses_spent_from.c
+    ${CCLIENT_API_CORE_DIR}/get_node_api_conf.c
 )
 set(CCLIENT_API_EXTENDED_DIR ${CCLIENT_DIR}/api/extended)
 set(CCLIENT_EXTENDED

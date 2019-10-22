@@ -13,5 +13,4 @@
 	url = https://github.com/XKCP/XKCP.git
 [submodule "components/iota_cclient/entangled"]
 	path = components/iota_cclient/entangled
-	url = https://github.com/oopsmonk/entangled.git
-	branch = cclient_esp32
+	url = https://github.com/iotaledger/entangled.git
