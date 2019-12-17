@@ -6,6 +6,10 @@ This is an IOTA Wallet application using [IOTA CClient](https://github.com/iotal
 
 ![](https://raw.githubusercontent.com/oopsmonk/iota_esp32_wallet/master/images/esp32_wallet_block_diagram.png)
 
+## Demonstration video 
+
+[![](http://img.youtube.com/vi/e6pxDTqd5Pw/0.jpg)](http://www.youtube.com/watch?v=e6pxDTqd5Pw)  
+
 ## Requirements  
 
 * [ESP32-DevKitC V4](https://docs.espressif.com/projects/esp-idf/en/v3.2.2/get-started/get-started-devkitc.html#esp32-devkitc-v4-getting-started-guide)
