@@ -15,7 +15,6 @@ set(COMMON_ERROR
 set(UTILS
     ${UTILS_DIR}/time.c
     ${UTILS_DIR}/logger_helper.c
-    ${UTILS_DIR}/handles/socket.c
     ${UTILS_DIR}/char_buffer.c
     ${UTILS_DIR}/memset_safe.c
 )
@@ -33,6 +32,7 @@ set(COMMON_TRINARY
 #http client
 set(HTTP_CLIENT
     ${CCLIENT_DIR}/http/http.c
+    ${CCLIENT_DIR}/http/socket.c
     ${CCLIENT_DIR}/service.c
 )
 #hash container
