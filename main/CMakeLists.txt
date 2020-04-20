@@ -10,7 +10,8 @@ set(COMPONENT_PRIV_REQUIRES
    uthash
    http_parser
    keccak
-   iota_cclient
+   iota_common
+   iota_client
    mbedtls
 )
 

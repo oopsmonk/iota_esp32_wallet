@@ -25,7 +25,7 @@
 
 static const char *TAG = "wallet_system";
 
-static iota_client_service_t g_cclient;
+static iota_client_service_t *g_cclient;
 
 static char const *amazon_ca1_pem =
     "-----BEGIN CERTIFICATE-----\r\n"
@@ -87,6 +87,7 @@ static void register_version() {
 /* 'restart' command */
 static int fn_restart(int argc, char **argv) {
   ESP_LOGI(TAG, "Restarting");
+  destory_iota_client();
   esp_restart();
 }
 
@@ -161,7 +162,7 @@ static int fn_node_info(int argc, char **argv) {
     return 0;
   }
 
-  if ((ret = iota_client_get_node_info(&g_cclient, node_res)) == RC_OK) {
+  if ((ret = iota_client_get_node_info(g_cclient, node_res)) == RC_OK) {
     printf("appName %s \n", get_node_info_res_app_name(node_res));
     printf("appVersion %s \n", get_node_info_res_app_version(node_res));
 
@@ -266,7 +267,7 @@ static int fn_get_balance(int argc, char **argv) {
 
   balance_req->threshold = 100;
 
-  if ((ret_code = iota_client_get_balances(&g_cclient, balance_req, balance_res)) == RC_OK) {
+  if ((ret_code = iota_client_get_balances(g_cclient, balance_req, balance_res)) == RC_OK) {
     hash243_queue_entry_t *q_iter = NULL;
     size_t balance_cnt = get_balances_res_balances_num(balance_res);
     printf("balances: [");
@@ -290,7 +291,7 @@ done:
 
 static void register_get_balance() {
   get_balance_args.address = arg_str1(NULL, NULL, "<ADDRESS>", "An Address hash");
-  get_balance_args.address->hdr.resetfn = (arg_resetfn*)arg_str_reset;
+  get_balance_args.address->hdr.resetfn = (arg_resetfn *)arg_str_reset;
   get_balance_args.end = arg_end(1);
   const esp_console_cmd_t get_balance_cmd = {
       .command = "balance",
@@ -317,7 +318,7 @@ static int fn_account_data(int argc, char **argv) {
   account_data_t account = {};
   account_data_init(&account);
 
-  if ((ret = iota_client_get_account_data(&g_cclient, seed, 2, &account)) == RC_OK) {
+  if ((ret = iota_client_get_account_data(g_cclient, seed, 2, &account)) == RC_OK) {
 #if 0  // dump transaction hashes
     size_t tx_count = hash243_queue_count(account.transactions);
     for (size_t i = 0; i < tx_count; i++) {
@@ -363,9 +364,9 @@ static void register_account_data() {
   ESP_ERROR_CHECK(esp_console_cmd_register(&account_data_cmd));
 }
 
-void convertToUpperCase(char *sPtr, int nchar){
-  for (int i=0; i<nchar; i++){
-    char *element = sPtr+i;
+void convertToUpperCase(char *sPtr, int nchar) {
+  for (int i = 0; i < nchar; i++) {
+    char *element = sPtr + i;
     *element = toupper((unsigned char)*element);
   }
 }
@@ -383,7 +384,6 @@ static struct {
 
 static int fn_send(int argc, char **argv) {
   retcode_t ret_code = RC_OK;
-  flex_trit_t tmp_hash[FLEX_TRIT_SIZE_243];
 
   int nerrors = arg_parse(argc, argv, (void **)&send_args);
   if (nerrors != 0) {
@@ -404,12 +404,15 @@ static int fn_send(int argc, char **argv) {
     security = 2;
   }
 
-  char padded_tag[NUM_TRYTES_TAG+1];
+  char padded_tag[NUM_TRYTES_TAG + 1];
   size_t tag_size = strlen(tag);
   convertToUpperCase((char *)tag, tag_size);
-  for (size_t i = 0; i < NUM_TRYTES_TAG; i++){
-    if (i < tag_size) padded_tag[i] = tag[i];
-    else padded_tag[i] = '9';
+  for (size_t i = 0; i < NUM_TRYTES_TAG; i++) {
+    if (i < tag_size) {
+      padded_tag[i] = tag[i];
+    } else {
+      padded_tag[i] = '9';
+    }
   }
   padded_tag[NUM_TRYTES_TAG] = '\0';
 
@@ -442,8 +445,7 @@ static int fn_send(int argc, char **argv) {
 
   // tag
   printf("tag: %s\n", padded_tag);
-  if (flex_trits_from_trytes(tf.tag, NUM_TRITS_TAG, (tryte_t const *)padded_tag, NUM_TRYTES_TAG,
-                             NUM_TRYTES_TAG) == 0) {
+  if (flex_trits_from_trytes(tf.tag, NUM_TRITS_TAG, (tryte_t const *)padded_tag, NUM_TRYTES_TAG, NUM_TRYTES_TAG) == 0) {
     ESP_LOGE(TAG, "tag flex_trits convertion failed");
     goto done;
   }
@@ -456,7 +458,7 @@ static int fn_send(int argc, char **argv) {
 
   transfer_array_add(transfers, &tf);
 
-  ret_code = iota_client_send_transfer(&g_cclient, seed, security, CONFIG_IOTA_DEPTH, CONFIG_IOTA_MWM, false, transfers,
+  ret_code = iota_client_send_transfer(g_cclient, seed, security, CONFIG_IOTA_DEPTH, CONFIG_IOTA_MWM, false, transfers,
                                        NULL, NULL, NULL, bundle);
 
   printf("send transaction: %s\n", error_2_string(ret_code));
@@ -482,13 +484,13 @@ static void register_send() {
   send_args.message = arg_str0("m", "message", "<MESSAGE>", "a message for this transaction");
   send_args.tag = arg_str0("t", "tag", "<TAG>", "A tag for this transaction");
   send_args.security = arg_int0("s", "security", "<SECURITY>", "The security level of the address");
-  send_args.end = arg_end(1);
-  //reset callbacks
-  send_args.receiver->hdr.resetfn = (arg_resetfn*)arg_str_reset;
-  send_args.value->hdr.resetfn = (arg_resetfn*)arg_str_reset;
-  send_args.remainder->hdr.resetfn = (arg_resetfn*)arg_str_reset;
-  send_args.message->hdr.resetfn = (arg_resetfn*)arg_str_reset;
-  send_args.tag->hdr.resetfn = (arg_resetfn*)arg_str_reset;
+  send_args.end = arg_end(12);
+  // reset callbacks
+  send_args.receiver->hdr.resetfn = (arg_resetfn *)arg_str_reset;
+  send_args.value->hdr.resetfn = (arg_resetfn *)arg_str_reset;
+  send_args.remainder->hdr.resetfn = (arg_resetfn *)arg_str_reset;
+  send_args.message->hdr.resetfn = (arg_resetfn *)arg_str_reset;
+  send_args.tag->hdr.resetfn = (arg_resetfn *)arg_str_reset;
 
   esp_console_cmd_t const send_cmd = {
       .command = "send",
@@ -542,7 +544,7 @@ static int fn_get_transactions(int argc, char **argv) {
     goto done;
   }
 
-  if (iota_client_find_transactions(&g_cclient, transactions_req, transactions_res) == RC_OK) {
+  if (iota_client_find_transactions(g_cclient, transactions_req, transactions_res) == RC_OK) {
     size_t count = hash243_queue_count(transactions_res->hashes);
     hash243_queue_t curr = transactions_res->hashes;
     for (size_t i = 0; i < count; i++) {
@@ -593,19 +595,12 @@ void register_wallet_commands() {
 }
 
 void init_iota_client() {
-  g_cclient.http.path = "/";
-  g_cclient.http.content_type = "application/json";
-  g_cclient.http.accept = "application/json";
-  g_cclient.http.host = CONFIG_IRI_NODE_URI;
-  g_cclient.http.port = CONFIG_IRI_NODE_PORT;
-  g_cclient.http.api_version = 1;
 #ifdef CONFIG_ENABLE_HTTPS
-  g_cclient.http.ca_pem = amazon_ca1_pem;
+  g_cclient = iota_client_core_init(CONFIG_IRI_NODE_URI, CONFIG_IRI_NODE_PORT, amazon_ca1_pem);
 #else
-  g_cclient.http.ca_pem = NULL;
+  g_cclient = iota_client_core_init(CONFIG_IRI_NODE_URI, CONFIG_IRI_NODE_PORT, NULL);
 #endif
-  g_cclient.serializer_type = SR_JSON;
   // logger_helper_init(LOGGER_DEBUG);
-  iota_client_core_init(&g_cclient);
-  iota_client_extended_init();
 }
+
+void destory_iota_client() { iota_client_core_destroy(g_cclient); }

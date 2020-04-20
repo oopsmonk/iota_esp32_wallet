@@ -11,3 +11,9 @@
 [submodule "components/keccak/keccak"]
 	path = components/keccak/keccak
 	url = https://github.com/XKCP/XKCP.git
+[submodule "components/iota_common/iota_common"]
+	path = components/iota_common/iota_common
+	url = https://github.com/iotaledger/iota_common.git
+[submodule "components/iota_client/iota_client"]
+	path = components/iota_client/iota_client
+	url = https://github.com/iotaledger/iota.c.git
