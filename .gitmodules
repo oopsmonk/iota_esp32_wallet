@@ -11,6 +11,3 @@
 [submodule "components/keccak/keccak"]
 	path = components/keccak/keccak
 	url = https://github.com/XKCP/XKCP.git
-[submodule "components/iota_cclient/entangled"]
-	path = components/iota_cclient/entangled
-	url = https://github.com/iotaledger/entangled.git
