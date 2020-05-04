@@ -603,4 +603,4 @@ void init_iota_client() {
   // logger_helper_init(LOGGER_DEBUG);
 }
 
-void destory_iota_client() { iota_client_core_destroy(g_cclient); }
+void destory_iota_client() { iota_client_core_destroy(&g_cclient); }
