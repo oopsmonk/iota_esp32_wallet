@@ -124,7 +124,6 @@ set(COMPONENT_ADD_INCLUDEDIRS ${CMAKE_CURRENT_LIST_DIR}/iota_client)
 # local components
 set(COMPONENT_REQUIRES
    iota_common
-   embear_logger 
    uthash
    http_parser
    keccak
