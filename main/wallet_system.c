@@ -193,7 +193,7 @@ static int fn_node_info(int argc, char **argv) {
 static void register_node_info() {
   const esp_console_cmd_t node_info_cmd = {
       .command = "info",
-      .help = "Get IRI node info",
+      .help = "Get IOTA node info",
       .hint = NULL,
       .func = &fn_node_info,
   };
@@ -417,7 +417,7 @@ static int fn_send(int argc, char **argv) {
   padded_tag[NUM_TRYTES_TAG] = '\0';
 
   printf("sending %lld to %s\n", value, receiver);
-  printf("security %d, depth %d, MWM %d, tag [%s]\n", security, CONFIG_IOTA_DEPTH, CONFIG_IOTA_MWM,
+  printf("security %d, depth %d, MWM %d, tag [%s]\n", security, CONFIG_IOTA_NODE_DEPTH, CONFIG_IOTA_NODE_MWM,
          strlen(tag) ? padded_tag : "empty");
   printf("remainder [%s]\n", strlen(remainder) ? remainder : "empty");
   printf("message [%s]\n", strlen(msg) ? msg : "empty");
@@ -458,8 +458,8 @@ static int fn_send(int argc, char **argv) {
 
   transfer_array_add(transfers, &tf);
 
-  ret_code = iota_client_send_transfer(g_cclient, seed, security, CONFIG_IOTA_DEPTH, CONFIG_IOTA_MWM, false, transfers,
-                                       NULL, NULL, NULL, bundle);
+  ret_code = iota_client_send_transfer(g_cclient, seed, security, CONFIG_IOTA_NODE_DEPTH, CONFIG_IOTA_NODE_MWM, false,
+                                       transfers, NULL, NULL, NULL, bundle);
 
   printf("send transaction: %s\n", error_2_string(ret_code));
   if (ret_code == RC_OK) {
@@ -596,9 +596,9 @@ void register_wallet_commands() {
 
 void init_iota_client() {
 #ifdef CONFIG_ENABLE_HTTPS
-  g_cclient = iota_client_core_init(CONFIG_IRI_NODE_URI, CONFIG_IRI_NODE_PORT, amazon_ca1_pem);
+  g_cclient = iota_client_core_init(CONFIG_IOTA_NODE_URL, CONFIG_IOTA_NODE_PORT, amazon_ca1_pem);
 #else
-  g_cclient = iota_client_core_init(CONFIG_IRI_NODE_URI, CONFIG_IRI_NODE_PORT, NULL);
+  g_cclient = iota_client_core_init(CONFIG_IOTA_NODE_URL, CONFIG_IOTA_NODE_PORT, NULL);
 #endif
   // logger_helper_init(LOGGER_DEBUG);
 }

@@ -215,7 +215,7 @@ void app_main() {
   /* Wait for the callback to set the CONNECTED_BIT in the event group. */
   xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT, false, true, portMAX_DELAY);
   ESP_LOGI(TAG, "Connected to AP");
-  ESP_LOGI(TAG, "IRI Node: %s, port: %d, HTTPS:%s\n", CONFIG_IRI_NODE_URI, CONFIG_IRI_NODE_PORT,
+  ESP_LOGI(TAG, "IOTA Node: %s, port: %d, HTTPS:%s\n", CONFIG_IOTA_NODE_URL, CONFIG_IOTA_NODE_PORT,
            CONFIG_ENABLE_HTTPS ? "True" : "False");
 
   // get time from sntp

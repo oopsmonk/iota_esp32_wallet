@@ -28,18 +28,18 @@ menu "IOTA Wallet"
                 POSIX timezone. Ref: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.json
     endmenu
 
-    menu "IRI Node"
-        config IRI_NODE_URI
-            string "IRI Node URI"
+    menu "IOTA Node URL"
+        config IOTA_NODE_URL
+            string "IOTA Node URL"
             default "nodes.thetangle.org"
             help
-                IRI uri for the example to use.
+                IOTA node url for the example to use.
 
-        config IRI_NODE_PORT
-            int "Port Number of IRI Node"
+        config IOTA_NODE_PORT
+            int "Port Number of IOTA Node"
             default 443
             help
-                IRI port for the example to use.
+                IOTA port for the example to use.
 
         config ENABLE_HTTPS
             bool "Use HTTPS"
@@ -49,16 +49,16 @@ menu "IOTA Wallet"
             string "Seed"
             default ""
             help
-                IRI port for the example to use.
+                IOTA Seed.
 
-        config IOTA_DEPTH
+        config IOTA_NODE_DEPTH
             int "Depth for tips selection"
             default 3
             help
-                Client application set to 3, if the depth is too large(above 15, it depends on the IRI's configuration)
+                Client application set to 3, if the depth is too large(above 15, it depends on the node configuration)
                 an error will be ocurred.
 
-        config IOTA_MWM
+        config IOTA_NODE_MWM
             int "Minimum Weight Magnitude for PoW"
             default 14
             help
