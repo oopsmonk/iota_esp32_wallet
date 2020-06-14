@@ -1,7 +1,3 @@
-[submodule "components/embear_logger/logger"]
-	path = components/embear_logger/logger
-	url = https://github.com/embear/logger.git
-	branch = v4.0.x
 [submodule "components/uthash/uthash"]
 	path = components/uthash/uthash
 	url = https://github.com/troydhanson/uthash.git

@@ -84,7 +84,6 @@ set(COMPONENT_SRCS
 set(COMPONENT_ADD_INCLUDEDIRS ${CMAKE_CURRENT_LIST_DIR}/${COMMONLIB_DIR})
 # local components
 set(COMPONENT_REQUIRES
-   embear_logger 
    uthash
    keccak
 )
