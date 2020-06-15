@@ -600,7 +600,13 @@ void init_iota_client() {
 #else
   g_cclient = iota_client_core_init(CONFIG_IOTA_NODE_URL, CONFIG_IOTA_NODE_PORT, NULL);
 #endif
-  // logger_helper_init(LOGGER_DEBUG);
+
+#ifdef CONFIG_CCLIENT_DEBUG
+  logger_helper_init(LOGGER_DEBUG);
+  logger_init_client_core(LOGGER_DEBUG);
+  logger_init_client_extended(LOGGER_DEBUG);
+  logger_init_json_serializer(LOGGER_DEBUG);
+#endif
 }
 
 void destory_iota_client() { iota_client_core_destroy(&g_cclient); }

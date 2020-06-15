@@ -137,11 +137,6 @@ set(COMPONENT_PRIV_REQUIRES
 
 register_component()
 
-# CClient debug
-if(CONFIG_CCLIENT_DEBUG)
-    add_definitions(-DDEBUG)
-endif()
-
 # flex_trit encoding
 if(CONFIG_ONE_TRIT_PER_BYTE)
     add_definitions(-DFLEX_TRIT_ENCODING_1_TRITS_PER_BYTE)
