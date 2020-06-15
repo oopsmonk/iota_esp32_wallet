@@ -22,6 +22,7 @@
 // iota cclient library
 #include "cclient/api/core/core_api.h"
 #include "cclient/api/extended/extended_api.h"
+#include "common/helpers/sign.h"
 #include "utils/input_validators.h"
 
 static const char *TAG = "wallet_system";
@@ -340,7 +341,7 @@ static struct {
 
 static int fn_get_balance(int argc, char **argv) {
   retcode_t ret_code = RC_OK;
-  flex_trit_t tmp_hash[FLEX_TRIT_SIZE_243];
+  flex_trit_t tmp_address[FLEX_TRIT_SIZE_243];
 
   int nerrors = arg_parse(argc, argv, (void **)&get_balance_args);
   if (nerrors != 0) {
@@ -348,37 +349,29 @@ static int fn_get_balance(int argc, char **argv) {
     return 1;
   }
 
-  char const *address_ptr = get_balance_args.address->sval[0];
-
-#if 0
-  if(argc != 2){
-    ESP_LOGE(TAG, "Invalid input");
-    return 2;
-  }
-
-#endif
-  if (strlen(address_ptr) != HASH_LENGTH_TRYTE) {
-    ESP_LOGE(TAG, "Invalid hash length!");
-    return 2;
-  }
-
   get_balances_req_t *balance_req = get_balances_req_new();
   get_balances_res_t *balance_res = get_balances_res_new();
-
   if (!balance_req || !balance_res) {
     ESP_LOGE(TAG, "Error: OOM");
     goto done;
   }
 
-  if (flex_trits_from_trytes(tmp_hash, NUM_TRITS_HASH, (const tryte_t *)address_ptr, NUM_TRYTES_HASH,
-                             NUM_TRYTES_HASH) == 0) {
-    ESP_LOGE(TAG, "Error: converting flex_trit failed");
-    goto done;
-  }
+  int addr_count = get_balance_args.address->count;
+  for (int i = 0; i < addr_count; i++) {
+    tryte_t const *address_ptr = (tryte_t *)get_balance_args.address->sval[i];
+    if (!is_address(address_ptr)) {
+      printf("Invalid address\n");
+      goto done;
+    }
+    if (flex_trits_from_trytes(tmp_address, NUM_TRITS_HASH, address_ptr, NUM_TRYTES_HASH, NUM_TRYTES_HASH) == 0) {
+      printf("Err: converting flex_trit failed\n");
+      goto done;
+    }
 
-  if ((ret_code = get_balances_req_address_add(balance_req, tmp_hash)) != RC_OK) {
-    ESP_LOGE(TAG, "Error: Adding hash to list failed!\n");
-    goto done;
+    if (get_balances_req_address_add(balance_req, tmp_address) != RC_OK) {
+      printf("Err: adding the hash to queue failed.\n");
+      goto done;
+    }
   }
 
   balance_req->threshold = 100;
@@ -386,11 +379,11 @@ static int fn_get_balance(int argc, char **argv) {
   if ((ret_code = iota_client_get_balances(iota_ctx.client, balance_req, balance_res)) == RC_OK) {
     hash243_queue_entry_t *q_iter = NULL;
     size_t balance_cnt = get_balances_res_balances_num(balance_res);
-    printf("balances: [");
     for (size_t i = 0; i < balance_cnt; i++) {
-      printf(" %" PRIu64 " ", get_balances_res_balances_at(balance_res, i));
+      printf("[%" PRIu64 "] ", get_balances_res_balances_at(balance_res, i));
+      flex_trit_print(get_balances_req_address_get(balance_req, i), NUM_TRITS_HASH);
+      printf("\n");
     }
-    printf("]\n");
 
     CDL_FOREACH(balance_res->references, q_iter) {
       printf("reference: ");
@@ -406,13 +399,14 @@ done:
 }
 
 static void register_get_balance() {
-  get_balance_args.address = arg_str1(NULL, NULL, "<ADDRESS>", "An Address hash");
+  // get_balance_args.address = arg_str1(NULL, NULL, "<ADDRESS>", "An Address hash");
+  get_balance_args.address = arg_strn(NULL, NULL, "<address...>", 1, 10, "Address hashes");
   get_balance_args.address->hdr.resetfn = (arg_resetfn *)arg_str_reset;
-  get_balance_args.end = arg_end(1);
+  get_balance_args.end = arg_end(12);
   const esp_console_cmd_t get_balance_cmd = {
       .command = "balance",
-      .help = "Get the balance from an address",
-      .hint = NULL,
+      .help = "Get the balance from an addresses",
+      .hint = " <address...>",
       .func = &fn_get_balance,
       .argtable = &get_balance_args,
   };
@@ -673,6 +667,7 @@ done:
 
 static void register_get_transactions() {
   get_transactions_args.address = arg_str1(NULL, NULL, "<ADDRESS>", "An Address hash");
+  get_transactions_args.address->hdr.resetfn = (arg_resetfn *)arg_str_reset;
   get_transactions_args.end = arg_end(1);
   const esp_console_cmd_t get_transactions_cmd = {
       .command = "transactions",
@@ -682,6 +677,235 @@ static void register_get_transactions() {
       .argtable = &get_transactions_args,
   };
   ESP_ERROR_CHECK(esp_console_cmd_register(&get_transactions_cmd));
+}
+
+/* 'gen_hash' command */
+tryte_t const tryte_chars[27] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+                                 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '9'};
+
+static struct {
+  struct arg_int *len;
+  struct arg_end *end;
+} gen_hash_args;
+
+static int fn_gen_hash(int argc, char **argv) {
+  int nerrors = arg_parse(argc, argv, (void **)&gen_hash_args);
+  if (nerrors != 0) {
+    arg_print_errors(stderr, gen_hash_args.end, argv[0]);
+    return -1;
+  }
+
+  int len = gen_hash_args.len->ival[0];
+  char *hash = (char *)malloc(sizeof(char) * (len + 1));
+  if (hash == NULL) {
+    ESP_LOGE(TAG, "Out of Memory\n");
+    return -1;
+  }
+
+  srand(time(0));
+  for (int i = 0; i < len; i++) {
+    memset(hash + i, tryte_chars[rand() % 27], 1);
+  }
+  hash[len] = '\0';
+
+  printf("Hash: %s\n", hash);
+  free(hash);
+  return 0;
+}
+
+static void register_gen_hash() {
+  gen_hash_args.len = arg_int1(NULL, NULL, "<lenght>", "a length of the hash");
+  gen_hash_args.end = arg_end(2);
+  const esp_console_cmd_t gen_hash_cmd = {
+      .command = "gen_hash",
+      .help = "Genrating a hash with a given length.\n  `gen_hash 81` for a random SEED",
+      .hint = " <length>",
+      .func = &fn_gen_hash,
+      .argtable = &gen_hash_args,
+  };
+  ESP_ERROR_CHECK(esp_console_cmd_register(&gen_hash_cmd));
+}
+
+/* 'get_addresses' command */
+static struct {
+  struct arg_str *start_idx;
+  struct arg_str *end_idx;
+  struct arg_end *end;
+} get_addresses_args;
+
+static int fn_get_addresses(int argc, char **argv) {
+  int nerrors = arg_parse(argc, argv, (void **)&get_addresses_args);
+  if (nerrors != 0) {
+    arg_print_errors(stderr, get_addresses_args.end, argv[0]);
+    return -1;
+  }
+
+  char *endptr = NULL;
+  uint64_t start_index = strtoll(get_addresses_args.start_idx->sval[0], &endptr, 10);
+  if (endptr == get_addresses_args.start_idx->sval[0]) {
+    ESP_LOGE(TAG, "No digits were found in start index\n");
+    return -1;
+  }
+  uint64_t end_index = strtoll(get_addresses_args.end_idx->sval[0], &endptr, 10);
+  if (endptr == get_addresses_args.end_idx->sval[0]) {
+    ESP_LOGE(TAG, "No digits were found in end index\n");
+    return -1;
+  }
+  if (end_index < start_index) {
+    ESP_LOGE(TAG, "end index[%" PRIu64 "] should bigger or equal to start index[%" PRIu64 "]\n", start_index,
+             end_index);
+    return -1;
+  }
+
+  printf("Security level: %d\n", iota_ctx.security);
+  // printf("get address %"PRId64" , %"PRId64"\n", start_index, end_index);
+  while (start_index <= end_index) {
+    char *addr = iota_sign_address_gen_trytes(iota_ctx.seed, start_index, iota_ctx.security);
+    printf("[%" PRIu64 "] %s\n", start_index, addr);
+    free(addr);
+    start_index++;
+  }
+
+  return 0;
+}
+
+static void register_get_addresses() {
+  get_addresses_args.start_idx = arg_str1(NULL, NULL, "<start>", "start index");
+  get_addresses_args.end_idx = arg_str1(NULL, NULL, "<end>", "end index");
+  get_addresses_args.start_idx->hdr.resetfn = (arg_resetfn *)arg_str_reset;
+  get_addresses_args.end_idx->hdr.resetfn = (arg_resetfn *)arg_str_reset;
+  get_addresses_args.end = arg_end(2);
+  const esp_console_cmd_t get_addresses_cmd = {
+      .command = "get_addresses",
+      .help = "Gets addresses by index",
+      .hint = " <start> <end>",
+      .func = &fn_get_addresses,
+      .argtable = &get_addresses_args,
+  };
+  ESP_ERROR_CHECK(esp_console_cmd_register(&get_addresses_cmd));
+}
+
+/* 'get_bundle' command */
+static struct {
+  struct arg_str *tail;
+  struct arg_end *end;
+} get_bundle_args;
+
+static int fn_get_bundle(int argc, char **argv) {
+  retcode_t ret_code = RC_OK;
+  flex_trit_t tmp_tail[FLEX_TRIT_SIZE_243];
+  bundle_status_t bundle_status = BUNDLE_NOT_INITIALIZED;
+  bundle_transactions_t *bundle = NULL;
+
+  int nerrors = arg_parse(argc, argv, (void **)&get_bundle_args);
+  if (nerrors != 0) {
+    arg_print_errors(stderr, get_bundle_args.end, argv[0]);
+    return -1;
+  }
+
+  tryte_t const *tail_ptr = (tryte_t *)get_bundle_args.tail->sval[0];
+  if (!is_address(tail_ptr)) {
+    ESP_LOGE(TAG, "Invalid address\n");
+    return -1;
+  }
+
+  bundle_transactions_new(&bundle);
+  if (flex_trits_from_trytes(tmp_tail, NUM_TRITS_HASH, tail_ptr, NUM_TRYTES_HASH, NUM_TRYTES_HASH) == 0) {
+    ESP_LOGE(TAG, "converting flex_trit failed.\n");
+  } else {
+    if ((ret_code = iota_client_get_bundle(iota_ctx.client, tmp_tail, bundle, &bundle_status)) == RC_OK) {
+      if (bundle_status == BUNDLE_VALID) {
+        printf("=== bundle status: %d ===\n", bundle_status);
+        bundle_dump(bundle);
+      } else {
+        ESP_LOGE(TAG, "Invalid bundle: %d\n", bundle_status);
+      }
+    } else {
+      ESP_LOGE(TAG, "%s\n", error_2_string(ret_code));
+    }
+  }
+
+  bundle_transactions_free(&bundle);
+  return ret_code;
+}
+
+static void register_get_bundle() {
+  get_bundle_args.tail = arg_strn(NULL, NULL, "<tail>", 1, 10, "A tail hash");
+  get_bundle_args.tail->hdr.resetfn = (arg_resetfn *)arg_str_reset;
+  get_bundle_args.end = arg_end(4);
+  const esp_console_cmd_t get_bundle_cmd = {
+      .command = "get_bundle",
+      .help = "Gets associated transactions from a tail hash",
+      .hint = " <tail>",
+      .func = &fn_get_bundle,
+      .argtable = &get_bundle_args,
+  };
+  ESP_ERROR_CHECK(esp_console_cmd_register(&get_bundle_cmd));
+}
+
+/* 'client_conf' command */
+static int fn_client_conf(int argc, char **argv) {
+  (void)argc;
+  (void)argv;
+  printf("MWM %d, Depth %d, Security %d\n", iota_ctx.mwm, iota_ctx.depth, iota_ctx.security);
+  return 0;
+}
+
+static void register_client_conf() {
+  const esp_console_cmd_t client_conf_cmd = {
+      .command = "client_conf",
+      .help = "Show client configurations",
+      .hint = NULL,
+      .func = &fn_client_conf,
+      .argtable = NULL,
+  };
+  ESP_ERROR_CHECK(esp_console_cmd_register(&client_conf_cmd));
+}
+
+/* 'client_conf_set' command */
+static struct {
+  struct arg_int *mwm;
+  struct arg_int *depth;
+  struct arg_int *security;
+  struct arg_end *end;
+} client_conf_set_args;
+
+static int fn_client_conf_set(int argc, char **argv) {
+  int nerrors = arg_parse(argc, argv, (void **)&client_conf_set_args);
+  if (nerrors != 0) {
+    arg_print_errors(stderr, client_conf_set_args.end, argv[0]);
+    return -1;
+  }
+
+  int security = client_conf_set_args.security->ival[0];
+  if (!is_security_level(security)) {
+    ESP_LOGE(TAG, "Invalid Security level.\n");
+    return -1;
+  }
+
+  iota_ctx.security = security;
+  iota_ctx.mwm = client_conf_set_args.mwm->ival[0];
+  iota_ctx.depth = client_conf_set_args.depth->ival[0];
+  printf("Set: MWM %d, Depth %d, Security %d\n", iota_ctx.mwm, iota_ctx.depth, iota_ctx.security);
+
+  return 0;
+}
+
+static void register_client_conf_set() {
+  client_conf_set_args.mwm = arg_int1(NULL, NULL, "<mwm>", "9 for testnet, 14 for mainnet");
+  client_conf_set_args.depth =
+      arg_int1(NULL, NULL, "<depth>", "The depth as which Random Walk starts, 3 is a typicall value used by wallets.");
+  client_conf_set_args.security =
+      arg_int1(NULL, NULL, "<security>", "The security level of addresses, can be 1, 2 or 3");
+  client_conf_set_args.end = arg_end(4);
+  const esp_console_cmd_t client_conf_set_cmd = {
+      .command = "client_conf_set",
+      .help = "Set client configurations",
+      .hint = " <mwm> <depth> <security>",
+      .func = &fn_client_conf_set,
+      .argtable = &client_conf_set_args,
+  };
+  ESP_ERROR_CHECK(esp_console_cmd_register(&client_conf_set_cmd));
 }
 
 //============= Public functions====================
@@ -703,6 +927,11 @@ void register_wallet_commands() {
   register_account_data();
   register_send();
   register_get_transactions();
+  register_gen_hash();
+  register_get_addresses();
+  register_get_bundle();
+  register_client_conf();
+  register_client_conf_set();
 }
 
 void init_iota_client() {
