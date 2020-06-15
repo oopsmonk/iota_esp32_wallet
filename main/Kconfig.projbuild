@@ -28,10 +28,10 @@ menu "IOTA Wallet"
                 POSIX timezone. Ref: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.json
     endmenu
 
-    menu "IOTA Node URL"
+    menu "IOTA Node"
         config IOTA_NODE_URL
             string "IOTA Node URL"
-            default "nodes.thetangle.org"
+            default "nodes.iota.cafe"
             help
                 IOTA node url for the example to use.
 
@@ -41,13 +41,13 @@ menu "IOTA Wallet"
             help
                 IOTA port for the example to use.
 
-        config ENABLE_HTTPS
-            bool "Use HTTPS"
+        config IOTA_NODE_ENABLE_HTTPS
+            bool "IOTA node with HTTPS"
             default y
 
         config IOTA_SEED
             string "Seed"
-            default ""
+            default "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
             help
                 IOTA Seed.
 

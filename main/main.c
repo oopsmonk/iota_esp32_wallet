@@ -14,6 +14,7 @@
 #include "driver/uart.h"
 #include "esp_console.h"
 #include "esp_event_loop.h"
+#include "esp_idf_version.h"
 #include "esp_log.h"
 #include "esp_spi_flash.h"
 #include "esp_system.h"
@@ -24,6 +25,7 @@
 #include "freertos/task.h"
 #include "linenoise/linenoise.h"
 #include "nvs_flash.h"
+#include "sdkconfig.h"
 #include "wallet_system.h"
 
 static const char *TAG = "esp32_main";
@@ -198,6 +200,8 @@ void app_main() {
   // init cclient
   init_iota_client();
 
+  ESP_LOGI(TAG, "esp-idf version: %s, app_version: %s", esp_get_idf_version(), APP_WALLET_VERSION);
+
   // char const *prompt = LOG_COLOR_CYAN "IOTA> " LOG_RESET_COLOR;
   char const *prompt = "IOTA> ";
   int probe_status = linenoiseProbe();
@@ -216,7 +220,7 @@ void app_main() {
   xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT, false, true, portMAX_DELAY);
   ESP_LOGI(TAG, "Connected to AP");
   ESP_LOGI(TAG, "IOTA Node: %s, port: %d, HTTPS:%s\n", CONFIG_IOTA_NODE_URL, CONFIG_IOTA_NODE_PORT,
-           CONFIG_ENABLE_HTTPS ? "True" : "False");
+           CONFIG_IOTA_NODE_ENABLE_HTTPS ? "True" : "False");
 
   // get time from sntp
   update_time();

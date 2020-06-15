@@ -2,6 +2,30 @@
 
 This is an IOTA Wallet application using [IOTA CClient](https://github.com/iotaledger/entangled/tree/develop/cclient) library on [ESP32](https://en.wikipedia.org/wiki/ESP32) microcontroller.  
 
+## Commands  
+
+#### System commands  
+* `help`: Show help
+* `version`: Show version info
+* `restart`: Restart ESP32
+* `free`: Show remained heap size
+* `stack`: Show stack info
+* `node_info`: Show IOTA node info
+* `node_info_set`: Set IOTA node URL and port number
+
+#### IOTA Client commands  
+* `seed`: Show IOTA seed
+* `seed_set`: Set IOTA seed
+* `balance`: Get balance from given addresses
+* `account`: Get balances from current seed
+* `send`: Send valued or data transactions
+* `transactions`: Get transactions from a given address
+* `gen_hash`: Generate hash from a given length
+* `get_addresses`: Generate addresses from given index.
+* `get_bundle`: Get a bundle from a given transaction tail.
+* `client_conf`: Show current MWM, Depth, and Security level
+* `client_conf_set`: Set MWM, Depth, and Security level.
+
 ## Block Diagram  
 
 ![](https://raw.githubusercontent.com/oopsmonk/iota_esp32_wallet/master/images/esp32_wallet_block_diagram.png)
@@ -26,10 +50,22 @@ Windows:
 * [xtensa-esp32 toolchain](https://docs.espressif.com/projects/esp-idf/en/v3.3.1/get-started-cmake/windows-setup.html#standard-setup-of-toolchain-for-windows-cmake) 
 * [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/v3.3.1/get-started-cmake/index.html#windows-command-prompt) 
 
-**Notice: We use the ESP-IDF v3.3.1, make sure you clone the right branch of ESP-IDF**
+**Notice: We use the ESP-IDF v4.0.1, make sure you clone the right branch of ESP-IDF**
 
 ```
-git clone -b v3.3.1 --recursive https://github.com/espressif/esp-idf.git
+git clone -b v4.0.1 --recursive https://github.com/espressif/esp-idf.git
+./install.sh
+source ./export.sh
+```
+
+Update esp-idf from previous version
+```
+cd esp-idf
+git fetch 
+git checkout v4.0.1 -b v4.0.1
+git submodule update --init --recursive
+./install.sh
+source ./export.sh
 ```
 
 
@@ -96,21 +132,22 @@ Windows: **TODO**
 
 ### Step 3: Wallet Configuration  
 
-In this step, you need to set up the WiFi, SNTP, IRI node, and SEED.  
+In this step, you need to set up the WiFi, SNTP, IOTA node, and SEED.  
 
 ```
 idf.py menuconfig
+
 # WiFi SSID & Password
 [IOTA Wallet] -> [WiFi]
 
 # SNTP Client
 [IOTA Wallet] -> [SNTP]
 
-# Default IRI node
-[IOTA Wallet] -> [IRI Node]
+# Default IOTA node
+[IOTA Wallet] -> [IOTA Node]
 
 # Default IOTA SEED 
-[IOTA Wallet] -> [IRI Node] -> () Seed
+[IOTA Wallet] -> [IOTA Node] -> () Seed
 ```
 
 You can check configures in `sdkconfig` file.  
@@ -121,11 +158,11 @@ Please make sure you assigned the seed(`CONFIG_IOTA_SEED`), Here is an example f
 CONFIG_SNTP_SERVER="pool.ntp.org"
 CONFIG_SNTP_TZ="CST-8" 
 CONFIG_IOTA_SEED="YOURSEED9YOURSEED9YOURSEED9YOURSEED9YOURSEED9YOURSEED9YOURSEED9YOURSEED9YOURSEED9"
-CONFIG_IOTA_DEPTH=6
-CONFIG_IOTA_MWM=9
-CONFIG_IRI_NODE_URI="nodes.devnet.iota.org"
+CONFIG_IOTA_NODE_DEPTH=3
+CONFIG_IOTA_NODE_MWM=14
+CONFIG_IRI_NODE_URL="nodes.iota.cafe"
 CONFIG_IRI_NODE_PORT=443
-CONFIG_ENABLE_HTTPS=y
+CONFIG_IOTA_NODE_ENABLE_HTTPS=y
 CONFIG_WIFI_SSID="MY_SSID"
 CONFIG_WIFI_PASSWORD="MY_PWD"
 ```
@@ -141,25 +178,27 @@ idf.py -p /dev/ttyUSB0 flash && idf.py -p /dev/ttyUSB0 monitor
 
 Output:  
 ```shell
-I (2230) event: sta ip: 192.168.11.7, mask: 255.255.255.0, gw: 192.168.11.1
-I (2230) esp32_main: Connected to AP
-I (2240) esp32_main: IRI Node: nodes.devnet.iota.org, port: 443, HTTPS:True
+I (5149) tcpip_adapter: sta ip: 192.168.11.149, mask: 255.255.255.0, gw: 192.168.11.1
+I (5149) esp32_main: Connected to AP
+I (5149) esp32_main: IOTA Node: nodes.thetangle.org, port: 443, HTTPS:True
 
-I (2250) esp32_main: Initializing SNTP: pool.ntp.org, Timezone: CST-8
-I (2250) esp32_main: Waiting for system time to be set... (1/10)
-I (4260) esp32_main: The current date/time is: Tue Aug  6 12:56:39 2019
+I (5159) esp32_main: Initializing SNTP: pool.ntp.org, Timezone: CST-8
+I (5169) esp32_main: Waiting for system time to be set... (1/10)
+I (7179) esp32_main: Waiting for system time to be set... (2/10)
+I (9179) esp32_main: The current date/time is: Mon Jun 15 17:25:08 2020
 IOTA> 
-IOTA> info
-appName IRI Testnet 
-appVersion 1.8.0-RC1 
-latestMilestone: VBKNZNCULYJPHGHSIAVQLNLNRVMV9UBPCHJRSBBFOWPCKYWRMXXZTPUQFKBXPRBQBCTHVMMMZZJTQG999
-latestMilestoneIndex 1307443 
-latestSolidSubtangleMilestone: VBKNZNCULYJPHGHSIAVQLNLNRVMV9UBPCHJRSBBFOWPCKYWRMXXZTPUQFKBXPRBQBCTHVMMMZZJTQG999
-latestSolidSubtangleMilestoneIndex 1307443 
-neighbors 2 
+IOTA> node_info
+=== Node: nodes.thetangle.org:443 ===
+appName IRI 
+appVersion 1.8.6 
+latestMilestone: HQKJKH9QFEILIVFRVKINXDURQHPRZGWEXCQXIDZURDCAHWHYIIVSGSXMVYAAVNAGQJDDIDSLMMPIA9999
+latestMilestoneIndex 1445037 
+latestSolidSubtangleMilestone: HQKJKH9QFEILIVFRVKINXDURQHPRZGWEXCQXIDZURDCAHWHYIIVSGSXMVYAAVNAGQJDDIDSLMMPIA9999
+latestSolidSubtangleMilestoneIndex 1445037 
+neighbors 24 
 packetsQueueSize 0 
-time 1565067405641 
-tips 93 
+time 1592213225856 
+tips 6153 
 transactionsToRequest 0 
 IOTA> 
 ```

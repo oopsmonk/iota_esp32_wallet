@@ -4,15 +4,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "esp_console.h"
-#include "esp_log.h"
-#include "esp_system.h"
-// #include "esp_sleep.h"
 #include "argtable3/argtable3.h"
 #include "driver/rtc_io.h"
 #include "driver/uart.h"
 #include "esp32/rom/uart.h"
+#include "esp_console.h"
+#include "esp_log.h"
 #include "esp_spi_flash.h"
+#include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "sdkconfig.h"
@@ -87,7 +86,8 @@ static int fn_get_version(int argc, char **argv) {
          info.features & CHIP_FEATURE_EMB_FLASH ? ", Embedded-Flash:" : ", External-Flash:",
          spi_flash_get_chip_size() / (1024 * 1024), " MB");
   printf("\trevision number:%d\r\n", info.revision);
-  printf("IOTA CClient Version:%s\r\n", "v1.0.0-beta");
+  printf("IOTA_COMMON_VERSION: %s, IOTA_CLIENT_VERSION: %s\n", IOTA_COMMON_VERSION, CCLIENT_VERSION);
+  printf("APP_VERSION: %s\n", APP_WALLET_VERSION);
   return 0;
 }
 
@@ -941,7 +941,7 @@ void init_iota_client() {
   memcpy(iota_ctx.seed, CONFIG_IOTA_SEED, NUM_TRYTES_HASH);
   iota_ctx.seed[NUM_TRYTES_HASH] = '\0';
 
-#ifdef CONFIG_ENABLE_HTTPS
+#ifdef CONFIG_IOTA_NODE_ENABLE_HTTPS
   iota_ctx.client = iota_client_core_init(CONFIG_IOTA_NODE_URL, CONFIG_IOTA_NODE_PORT, amazon_ca1_pem);
 #else
   iota_ctx.client = iota_client_core_init(CONFIG_IOTA_NODE_URL, CONFIG_IOTA_NODE_PORT, NULL);
@@ -953,6 +953,7 @@ void init_iota_client() {
   logger_init_client_extended(LOGGER_DEBUG);
   logger_init_json_serializer(LOGGER_DEBUG);
 #endif
+  ESP_LOGI(TAG, "IOTA_COMMON_VERSION: %s IOTA_CLIENT_VERSION: %s\n", IOTA_COMMON_VERSION, CCLIENT_VERSION);
 }
 
 void destory_iota_client() { iota_client_core_destroy(&iota_ctx.client); }
