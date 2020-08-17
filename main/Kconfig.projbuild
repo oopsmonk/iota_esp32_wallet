@@ -53,14 +53,14 @@ menu "IOTA Wallet"
 
         config IOTA_NODE_DEPTH
             int "Depth for tips selection"
-            default 3
+            default 1
             help
-                Client application set to 3, if the depth is too large(above 15, it depends on the node configuration)
+                Client application set to 1, if the depth is too large(above 15, it depends on the node configuration)
                 an error will be ocurred.
 
         config IOTA_NODE_MWM
             int "Minimum Weight Magnitude for PoW"
-            default 14
+            default 10
             help
                 14 for mannet, 6 for devnet or testnet.
     endmenu
