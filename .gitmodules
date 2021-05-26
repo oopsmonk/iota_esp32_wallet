@@ -1,0 +1,3 @@
+[submodule "components/iota_c/iota_c"]
+	path = components/iota_c/iota_c
+	url = https://github.com/oopsmonk/iota.c.git
