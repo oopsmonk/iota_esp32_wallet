@@ -32,7 +32,7 @@ $ source ./export.sh
 $ git clone https://github.com/oopsmonk/iota_esp32_wallet.git
 $ cd iota_esp32_wallet
 $ git checkout dev_chrysalis
-$ ???
+$ git submodule update --init --recursive
 ```
 ### ESP32 target
 
