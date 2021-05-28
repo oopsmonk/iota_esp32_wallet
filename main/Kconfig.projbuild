@@ -30,6 +30,12 @@ menu "IOTA Wallet"
         help
             The API port of the IOTA node.
 
+    config WALLET_SEED
+        string "Wallet SEED"
+        default "random"
+        help
+            The seed of this wallet
+
     config IOTA_UNIT_TESTS
         bool "Testing Application"
         default n

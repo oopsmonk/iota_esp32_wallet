@@ -33,11 +33,14 @@ set(CLIENT_SRCS
     "${IOTA_SRC_DIR}/client/api/v1/response_error.c"
     "${IOTA_SRC_DIR}/client/api/v1/send_message.c")
 
+set(WALLET_SRCS "${IOTA_SRC_DIR}/wallet/wallet.c")
+
 idf_component_register(
   SRCS
   ${CRYPTO_SRCS}
   ${CORE_SRCS}
   ${CLIENT_SRCS}
+  ${WALLET_SRCS}
   INCLUDE_DIRS
   "iota_c/src"
   PRIV_REQUIRES
