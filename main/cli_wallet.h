@@ -1,9 +1,7 @@
 #pragma once
 
-// #include "wallet/wallet.h"
-
 #define WALLET_VERSION_MAJOR 0
-#define WALLET_VERSION_MINOR 1
+#define WALLET_VERSION_MINOR 2
 #define WALLET_VERSION_MICRO 0
 
 #define VER_STR0(s) #s
