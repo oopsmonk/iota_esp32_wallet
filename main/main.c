@@ -23,6 +23,8 @@
 #include "esp_vfs_fat.h"
 #include "linenoise/linenoise.h"
 #include "nvs.h"
+// sntp
+#include "esp_sntp.h"
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
@@ -153,6 +155,7 @@ static void dump_chip_info() {
   printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
          (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
   printf("Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
+  printf("esp-idf version: %s, app_version: %s\n", esp_get_idf_version(), APP_WALLET_VERSION);
 }
 
 /* Console command history can be stored to and loaded from a file.
@@ -241,16 +244,45 @@ static void initialize_console(void) {
 #endif
 }
 
-void app_main(void) {
-  // Print chip information
-  dump_chip_info();
+static void update_time() {
+  // init sntp
+  ESP_LOGI(TAG, "Initializing SNTP: %s, Timezone: %s", CONFIG_SNTP_SERVER, CONFIG_SNTP_TZ);
+  sntp_setoperatingmode(SNTP_OPMODE_POLL);
+  sntp_setservername(0, CONFIG_SNTP_SERVER);
+  // sntp_setservername(0, "pool.ntp.org");
+  sntp_init();
 
+  // wait for time to be set
+  time_t now = 0;
+  struct tm timeinfo = {0};
+  int retry = 0;
+  const int retry_count = 10;
+  while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry < retry_count) {
+    ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
+    vTaskDelay(2000 / portTICK_PERIOD_MS);
+  }
+  time(&now);
+
+  // set timezone
+  char strftime_buf[64];
+  setenv("TZ", CONFIG_SNTP_TZ, 1);
+  tzset();
+  localtime_r(&now, &timeinfo);
+  strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+  ESP_LOGI(TAG, "The current date/time is: %s", strftime_buf);
+}
+
+void app_main(void) {
   // Initialize NVS
   initialize_nvs();
 
+  // Print chip information
+  dump_chip_info();
+
   wifi_init();
 
-  ESP_LOGI(TAG, "esp-idf version: %s, app_version: %s", esp_get_idf_version(), APP_WALLET_VERSION);
+  // get time from sntp
+  update_time();
 
   // init wallet instance
   if (init_wallet()) {
