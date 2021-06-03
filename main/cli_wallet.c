@@ -141,7 +141,7 @@ static int fn_free_mem(int argc, char **argv) {
 static void register_free() {
   const esp_console_cmd_t cmd = {
       .command = "free",
-      .help = "Get the current size of free heap memory",
+      .help = "Get the size of available heap.",
       .hint = NULL,
       .func = &fn_free_mem,
   };
