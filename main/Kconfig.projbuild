@@ -52,6 +52,12 @@ menu "IOTA Wallet"
         help
             The seed of this wallet
 
+    config SENSOR_DELAY_SCALE
+        int "Sensor Sampling Period"
+        default 60
+        help
+            The scale of sampling period
+
     config IOTA_UNIT_TESTS
         bool "Testing Application"
         default n

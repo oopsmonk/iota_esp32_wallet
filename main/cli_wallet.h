@@ -1,7 +1,10 @@
+// Copyright 2021 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 #pragma once
 
 #define WALLET_VERSION_MAJOR 0
-#define WALLET_VERSION_MINOR 2
+#define WALLET_VERSION_MINOR 3
 #define WALLET_VERSION_MICRO 0
 
 #define VER_STR0(s) #s
@@ -14,3 +17,5 @@
 // Register system commands
 void register_wallet_commands();
 int init_wallet();
+// timestamp in seconds
+uint64_t timestamp();

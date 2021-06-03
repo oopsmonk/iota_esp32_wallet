@@ -1,7 +1,11 @@
+// Copyright 2021 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 #include <ctype.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/time.h>
 
 #include "argtable3/argtable3.h"
 #include "driver/rtc_io.h"
@@ -18,6 +22,7 @@
 #include "soc/rtc_cntl_reg.h"
 
 #include "cli_wallet.h"
+#include "sensor.h"
 
 #include "client/api/v1/get_node_info.h"
 #include "client/api/v1/send_message.h"
@@ -54,6 +59,14 @@ void print_iota(uint64_t value) {
   printf("%s", value_str);
 }
 #endif
+
+// json buffer for simple sensor data
+char sensor_json[256];
+char *get_sensor_json() {
+  snprintf(sensor_json, sizeof(sensor_json), "{\"Device\":\"%s\",\"Temp\":%.2f,\"timestamp\":%" PRId64 "}",
+           CONFIG_IDF_TARGET, get_temp(), timestamp());
+  return sensor_json;
+}
 
 // 0 on success
 static int config_validation() {
@@ -292,7 +305,7 @@ static int fn_send_msg(int argc, char **argv) {
     return -1;
   }
 
-  char *recv_addr = send_msg_args.receiver->sval[0];
+  char const *const recv_addr = send_msg_args.receiver->sval[0];
   // validating receiver address
   if (strncmp("atoi", recv_addr, 4) == 0 || strncmp("iota", recv_addr, 4) == 0) {
     // convert bech32 address to binary
@@ -388,6 +401,85 @@ static void register_node_info() {
   ESP_ERROR_CHECK(esp_console_cmd_register(&node_info_cmd));
 }
 
+/* 'sensor' command */
+static struct {
+  struct arg_dbl *repeat;
+  struct arg_end *end;
+} send_sensor_args;
+
+int send_sensor_data() {
+  indexation_t *idx = NULL;
+  core_message_t *msg = NULL;
+  res_send_message_t msg_res = {};
+  char *data = get_sensor_json();
+
+  if ((idx = indexation_create("ESP32 Sensor", (byte_t *)data, strlen(data))) == NULL) {
+    ESP_LOGE(TAG, "create data payload failed\n");
+    return -1;
+  }
+
+  if ((msg = core_message_new()) == NULL) {
+    ESP_LOGE(TAG, "create message failed\n");
+    indexation_free(idx);
+    return -1;
+  }
+
+  msg->payload = idx;
+  msg->payload_type = MSG_PAYLOAD_INDEXATION;  // indexation playload
+
+  if (send_core_message(&wallet->endpoint, msg, &msg_res) != 0) {
+    ESP_LOGE(TAG, "send message failed\n");
+    goto err;
+  }
+
+  if (msg_res.is_error == true) {
+    printf("Error: %s\n", msg_res.u.error->msg);
+    goto err;
+  }
+
+  printf("Message ID: %s\ndata: %s\n", msg_res.u.msg_id, data);
+  return 0;
+
+err:
+  core_message_free(msg);
+  return -1;
+}
+
+static int fn_sensor(int argc, char **argv) {
+  int nerrors = arg_parse(argc, argv, (void **)&send_sensor_args);
+  if (nerrors != 0) {
+    arg_print_errors(stderr, send_sensor_args.end, argv[0]);
+    return -1;
+  }
+  uint32_t repeat = (uint32_t)send_sensor_args.repeat->dval[0];
+  if (repeat == 0) {
+    return send_sensor_data();
+  } else {
+    send_sensor_data();
+
+    uint32_t delay_arg = (uint32_t)send_sensor_args.repeat->dval[1];
+    delay_arg = delay_arg ? delay_arg : 1;
+    TickType_t delay_ticks = delay_arg * CONFIG_SENSOR_DELAY_SCALE * (1000 / portTICK_PERIOD_MS);
+    for (uint32_t i = 1; i < repeat; i++) {
+      vTaskDelay(delay_ticks);
+      send_sensor_data();
+    }
+  }
+  return 0;
+}
+
+static void register_sensor() {
+  send_sensor_args.repeat = arg_dbln(NULL, NULL, "<repeat> <delay>", 1, 2, "repeat and delay");
+  send_sensor_args.end = arg_end(2);
+  const esp_console_cmd_t sensor_cmd = {
+      .command = "sensor",
+      .help = "Sent sensor data to the Tangle",
+      .hint = " <repeat> <delay>",
+      .func = &fn_sensor,
+      .argtable = &send_sensor_args,
+  };
+  ESP_ERROR_CHECK(esp_console_cmd_register(&sensor_cmd));
+}
 //============= Public functions====================
 
 void register_wallet_commands() {
@@ -403,6 +495,7 @@ void register_wallet_commands() {
   register_get_balance();
   register_send_tokens();
   register_get_address();
+  register_sensor();
 }
 
 int init_wallet() {
@@ -446,4 +539,10 @@ int init_wallet() {
   ESP_LOGE(TAG, "config endpoint failed");
   wallet_destroy(wallet);
   return -1;
+}
+
+uint64_t timestamp() {
+  struct timeval tv = {0, 0};
+  gettimeofday(&tv, NULL);
+  return (uint64_t)tv.tv_sec;
 }

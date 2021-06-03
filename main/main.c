@@ -1,6 +1,7 @@
-// Copyright 2020 IOTA Stiftung
+// Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -30,6 +31,7 @@
 #include "lwip/sys.h"
 
 #include "cli_wallet.h"
+#include "sensor.h"
 
 #define APP_WIFI_SSID CONFIG_ESP_WIFI_SSID
 #define APP_WIFI_PWD CONFIG_ESP_WIFI_PASSWORD
@@ -264,12 +266,12 @@ static void update_time() {
   time(&now);
 
   // set timezone
-  char strftime_buf[64];
+  char strftime_buf[64] = {};
   setenv("TZ", CONFIG_SNTP_TZ, 1);
   tzset();
   localtime_r(&now, &timeinfo);
   strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-  ESP_LOGI(TAG, "The current date/time is: %s", strftime_buf);
+  ESP_LOGI(TAG, "The current date/time is: %s (%" PRIu64 ")", strftime_buf, timestamp());
 }
 
 void app_main(void) {
@@ -279,7 +281,11 @@ void app_main(void) {
   // Print chip information
   dump_chip_info();
 
+  // wifi setup
   wifi_init();
+
+  // temperature sensor
+  init_tempsensor();
 
   // get time from sntp
   update_time();
