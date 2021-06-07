@@ -25,6 +25,12 @@ static int64_t time_in_ms() {
   return ((int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec) / 1000;
 }
 
+static int64_t time_in_us() {
+  struct timeval tv_now;
+  gettimeofday(&tv_now, NULL);
+  return (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
+};
+
 //===========Tests===========
 TEST_CASE("Address Generation", "[core]") {
   char const* const exp_iot_bech32 = "iot1qpg4tqh7vj9s7y9zk2smj8t4qgvse9um42l7apdkhw6syp5ju4w3v6ffg6n";
@@ -258,35 +264,42 @@ TEST_CASE("Payload Serialization", "[core]") {
 }
 
 //=========Benchmarks========
+#define ADDR_NUMS 100
+
 TEST_CASE("Bench address generation", "[bench]") {
   char path_buf[128] = {};
   byte_t seed[IOTA_SEED_BYTES] = {};
   byte_t ed_addr[IOTA_ADDRESS_BYTES] = {};
-  char bech32_addr[IOTA_ADDRESS_BYTES] = {};
+  char bech32_addr[IOTA_ADDRESS_HEX_BYTES + 1] = {};
   size_t ret_size = 0;
-  int addr_num = 100;
-  int64_t stime, etime;
-
+  int64_t start_time = 0, time_spent = 0;
+  int64_t min = 0, max = 0, sum = 0;
   random_seed(seed);
 
-  printf("generating addresses...\n");
-  stime = time_in_ms();
-  for (size_t idx = 0; idx < addr_num; idx++) {
-    ret_size = snprintf(path_buf, 128, "m/44'/4218'/0'/0'/%" PRIu32 "'", idx);
+  for (size_t idx = 0; idx < ADDR_NUMS; idx++) {
+    ret_size = snprintf(path_buf, 128, "m/44'/4218'/0'/0'/%zu'", idx);
     if (ret_size >= 128) {
       path_buf[128 - 1] = '\0';
     }
     ed_addr[0] = 0;
+    start_time = time_in_us();
     if (address_from_path(seed, path_buf, ed_addr + 1) == 0) {
       if (address_2_bech32(ed_addr, "iota", bech32_addr) != 0) {
         printf("convert to bech32 failed\n");
+        break;
       }
+      time_spent = time_in_us() - start_time;
+      max = (idx == 0 || time_spent > max) ? time_spent : max;
+      min = (idx == 0 || time_spent < min) ? time_spent : min;
+      sum += time_spent;
+      // printf("%zu: %"PRId64", max %"PRId64", min %"PRId64"\n", idx, time_spent, max, min);
     } else {
       printf("drive from path failed\n");
+      break;
     }
   }
-  etime = time_in_ms();
-  printf("Bench: %d bech32 addresses created in %" PRIu64 "ms\n", addr_num, etime - stime);
+  printf("Bench %d address generation\n\tmin(ms)\tmax(ms)\tavg(ms)\ttotal(ms)\n", ADDR_NUMS);
+  printf("\t%.3f\t%.3f\t%.3f\t%.3f\n", (min / 1000.0), (max / 1000.0), (sum / ADDR_NUMS) / 1000.0, sum / 1000.0);
 }
 
 void app_main(void) {
@@ -308,12 +321,12 @@ void app_main(void) {
   printf("Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
 
   UNITY_BEGIN();
-  ESP_LOGI(TAG, "Testing...");
+  ESP_LOGI(TAG, "%s Testing...", CONFIG_IDF_TARGET);
   unity_run_tests_by_tag("[bench]", true);
   UNITY_END();
 
   UNITY_BEGIN();
-  ESP_LOGI(TAG, "Benchmarking...");
+  ESP_LOGI(TAG, "%s Benchmarking...", CONFIG_IDF_TARGET);
   unity_run_tests_by_tag("[bench]", false);
   UNITY_END();
 
