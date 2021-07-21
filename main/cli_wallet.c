@@ -25,6 +25,7 @@
 #include "sensor.h"
 
 #include "client/api/v1/get_node_info.h"
+#include "client/api/v1/get_outputs_from_address.h"
 #include "client/api/v1/send_message.h"
 #include "wallet/wallet.h"
 
@@ -69,23 +70,42 @@ char *get_sensor_json() {
 }
 
 // 0 on success
-static int config_validation() {
+static int endpoint_validation(iota_wallet_t *w) {
   // URL parsing
   struct http_parser_url u;
+  char const *const url = APP_NODE_URL;
   http_parser_url_init(&u);
-  int parse_ret = http_parser_parse_url(APP_NODE_URL, strlen(APP_NODE_URL), 0, &u);
+  int parse_ret = http_parser_parse_url(url, strlen(url), 0, &u);
   if (parse_ret != 0) {
-    ESP_LOGE(TAG, "validating endpoint error\n");
+    ESP_LOGE(TAG, "invalid URL of the endpoint\n");
     return -1;
   }
 
-  // seed length
-  if (strcmp(CONFIG_WALLET_SEED, "random") != 0) {
-    if (strlen(CONFIG_WALLET_SEED) != 64) {
-      ESP_LOGE(TAG, "seed length is %d, should be 64\n", strlen(CONFIG_WALLET_SEED));
+  // get hostname
+  if (u.field_set & (1 << UF_HOST)) {
+    if (sizeof(w->endpoint.host) > u.field_data[UF_HOST].len) {
+      strncpy(w->endpoint.host, url + u.field_data[UF_HOST].off, u.field_data[UF_HOST].len);
+      w->endpoint.host[u.field_data[UF_HOST].len] = '\0';
+    } else {
+      ESP_LOGE(TAG, "hostname is too long\n");
       return -1;
     }
   }
+
+  // get port number
+  if (u.field_set & (1 << UF_PORT)) {
+    w->endpoint.port = u.port;
+  } else {
+    w->endpoint.port = APP_NODE_PORT;
+  }
+
+  // TLS?
+  if (strncmp(url, "https", strlen("https")) == 0) {
+    w->endpoint.use_tls = true;
+  } else {
+    w->endpoint.use_tls = false;
+  }
+
   return 0;
 }
 
@@ -315,7 +335,7 @@ static int fn_send_msg(int argc, char **argv) {
     }
   } else if (strlen(recv_addr) == IOTA_ADDRESS_HEX_BYTES) {
     // convert ed25519 string to binary
-    if (hex2bin(recv_addr, strlen(recv_addr), recv + 1, ED25519_ADDRESS_BYTES) != 0) {
+    if (hex_2_bin(recv_addr, strlen(recv_addr), recv + 1, ED25519_ADDRESS_BYTES) != 0) {
       ESP_LOGE(TAG, "invalid ed25519 address\n");
       return -1;
     }
@@ -480,6 +500,24 @@ static void register_sensor() {
   };
   ESP_ERROR_CHECK(esp_console_cmd_register(&sensor_cmd));
 }
+
+/* 'api_test' command */
+static int fn_api_test(int argc, char **argv) {
+  int err = 0;
+  // TODO testing basic APIs
+  return err;
+}
+
+static void register_api_test() {
+  const esp_console_cmd_t api_test_cmd = {
+      .command = "api_test",
+      .help = "test client APIs",
+      .hint = NULL,
+      .func = &fn_api_test,
+  };
+  ESP_ERROR_CHECK(esp_console_cmd_register(&api_test_cmd));
+}
+
 //============= Public functions====================
 
 void register_wallet_commands() {
@@ -496,15 +534,13 @@ void register_wallet_commands() {
   register_send_tokens();
   register_get_address();
   register_sensor();
+  register_api_test();
 }
 
 int init_wallet() {
   byte_t seed[IOTA_SEED_BYTES] = {};
 
-  if (config_validation() != 0) {
-    return -1;
-  }
-
+  // seed validation
   if (strcmp(CONFIG_WALLET_SEED, "random") == 0) {
     random_seed(seed);
   } else {
@@ -513,7 +549,7 @@ int init_wallet() {
       ESP_LOGI(TAG, "invalid seed length: %zu, expect 64 characters", seed_len);
       return -1;
     }
-    hex2bin(CONFIG_WALLET_SEED, strlen(CONFIG_WALLET_SEED), seed, sizeof(seed));
+    hex_2_bin(CONFIG_WALLET_SEED, strlen(CONFIG_WALLET_SEED), seed, sizeof(seed));
   }
 
   // create wallet instance
@@ -523,15 +559,21 @@ int init_wallet() {
     return -1;
   }
 
+  if (endpoint_validation(wallet) != 0) {
+    wallet_destroy(wallet);
+    return -1;
+  }
+
   // config wallet
-  if (wallet_set_endpoint(wallet, APP_NODE_URL, APP_NODE_PORT) == 0) {
+  ESP_LOGI(TAG, "Connect to node: %s:%d tls:%s", wallet->endpoint.host, wallet->endpoint.port,
+           wallet->endpoint.use_tls ? "true" : "false");
+  if (wallet_set_endpoint(wallet, wallet->endpoint.host, wallet->endpoint.port, wallet->endpoint.use_tls) == 0) {
     if (wallet_update_bech32HRP(wallet) != 0) {
       ESP_LOGE(TAG, "update bech32HRP failed");
       wallet_destroy(wallet);
       return -1;
     }
 
-    ESP_LOGI(TAG, "Wallet endpoint: %s", wallet->endpoint.url);
     ESP_LOGI(TAG, "Bech32HRP: %s", wallet->bech32HRP);
     return 0;
   }

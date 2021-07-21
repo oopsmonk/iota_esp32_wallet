@@ -42,7 +42,8 @@ menu "IOTA Wallet"
 
     config IOTA_NODE_PORT
         int "port number"
-        default 0
+        range 0 65535
+        default 443
         help
             The API port of the IOTA node.
 
