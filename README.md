@@ -1,13 +1,26 @@
-# IOTA ESP32 Wallet  
+# IOTA Client Software Development Kid(SDK) for ESP32
 
-IOTA wallet application for [Chrysalis](https://chrysalis.docs.iota.org/introduction/what_is_chrysalis.html) network. This wallet application implements simple functions for demonstrating [iota.c](https://github.com/iotaledger/iota.c) library.
+This SDK is built on top of [iota.c](https://github.com/iotaledger/iota.c) and [ESP-IDF](https://github.com/espressif/esp-idf) for IOTA client development on ESP32 MCU series.
 
-Learn more about [iota.c](https://github.com/iotaledger/iota.c) please visit: [IOTA C Client Documentation](https://iota-c-client.readthedocs.io/en/latest/index.html)
+Learn more about [iota.c](https://github.com/iotaledger/iota.c) please visit [IOTA C Client Documentation](https://iota-c-client.readthedocs.io/en/latest/index.html)
 
 
-## Wallet Commands
+## Example Commands
 
-**System commands:**
+This SDK provides some example for testing and learn IOTA Client application, commands are shown below:
+
+**Client API**
+
+* `node_info` - Get connected node info
+
+**Wallet**
+
+* `balance` - Get address balance by the index rage.
+* `address` - Get address by the index range.
+* `send` - Send tokens from the given index to the receiver address.
+* `sensor` - Send sensor data to the Tangle periodically.
+
+**System**
 
 * `help` - List commands
 * `free` - Get the size of available heap.
@@ -15,14 +28,6 @@ Learn more about [iota.c](https://github.com/iotaledger/iota.c) please visit: [I
 * `stack` - Get main stack info
 * `version` - Get esp32 and wallet versions
 * `restart` - system reboot
-
-**IOTA commands:**
-
-* `node_info` - Get connected node info
-* `balance` - Get address balance by the index rage.
-* `address` - Get address by the index range.
-* `send` - Send tokens from the given index to the receiver address.
-* `sensor` - Send sensor data to the Tangle periodically.
 
 ## Requirements  
 

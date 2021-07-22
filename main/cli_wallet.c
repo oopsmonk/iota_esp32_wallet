@@ -411,7 +411,7 @@ static int fn_node_info(int argc, char **argv) {
   return err;
 }
 
-static void register_node_info() {
+static void register_api_node_info() {
   const esp_console_cmd_t node_info_cmd = {
       .command = "node_info",
       .help = "Show node info",
@@ -529,12 +529,22 @@ void register_wallet_commands() {
   register_restart();
 
   // wallet APIs
-  register_node_info();
   register_get_balance();
   register_send_tokens();
   register_get_address();
   register_sensor();
-  register_api_test();
+
+  // client APIs
+  register_api_node_info();
+  // TODO
+  // register_api_find_message();
+  // register_api_get_balance();
+  // register_api_get_msg_children();
+  // register_api_get_msg_metadata();
+  // register_api_get_msg();
+  // register_api_get_output();
+  // register_api_get_outputs_from_addr();
+  // register_api_get_tips();
 }
 
 int init_wallet() {
