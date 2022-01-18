@@ -1,3 +1,5 @@
+# **This repo has been moved to [iotaledger/esp32-client-sdk](https://github.com/iotaledger/esp32-client-sdk)**
+
 # IOTA ESP32 Wallet  
 
 This is an IOTA Wallet application using [IOTA CClient](https://github.com/iotaledger/entangled/tree/develop/cclient) library on [ESP32](https://en.wikipedia.org/wiki/ESP32) microcontroller.  
